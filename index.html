@@ -93,8 +93,9 @@
     #v_preview .pvskins{display:none!important}
     #v_preview .pvwrap{padding:0!important}
     #v_preview .pvph{width:100%!important;max-width:100%!important;height:100vh!important;height:100dvh!important;border:none!important;box-shadow:none!important;
-      /* hoia mäng telefoni status-bari / viewer-äpi nupuriba ja home-indikaatori alt väljas */
-      padding-top:calc(env(safe-area-inset-top,20px) + 44px);
+      /* hoia mäng telefoni status-bari alt väljas — safe-area katab notchi, lisapolster pole vaja
+         (vana +44px oli Androidi HTML-vieweri jaoks; veebis/PWA-s raiskas iPhone'il ~60px) */
+      padding-top:max(env(safe-area-inset-top,12px),12px);
       padding-bottom:calc(env(safe-area-inset-bottom,0px) + 6px);
       padding-left:max(env(safe-area-inset-left,0px),7px);
       padding-right:max(env(safe-area-inset-right,0px),7px)}
@@ -1161,7 +1162,7 @@ const BOSS_HEARING={
 // Real AdMob "native advanced" ads supply these same fields (advertiser, headline, body, cta, +icon/image)
 // as DATA from Google's network; you just bind them to this template. Banner/interstitial are easy in a
 // WebView; native needs a JS bridge (native layer fetches the NativeAd, passes assets in, reports clicks).
-let ADS={banner:true,native:true};
+let ADS={banner:true,native:true}; // bänner JÄÄB (Siimu otsus 11.06) — ruum võideti hoopis lamedamatest action-nuppudest ja kaartidest
 const PROMOS=[
   {advertiser:"Acme Cloud",headline:"Ship 10× faster on Acme Cloud",body:"The infra behind 3 of last year's unicorns. Start free.",cta:"Start free"},
   {advertiser:"HyperSaaS",headline:"Your competitors already run HyperSaaS",body:"Dashboards, an AI copilot, and a synergy score.",cta:"Book a demo"},
@@ -1198,7 +1199,7 @@ function renderPreviewShell(){
     border:3px solid var(--bk);box-shadow:8px 8px 0 var(--bk);overflow:hidden;display:flex;flex-direction:column;
     font-family:"Helvetica Neue",Arial,sans-serif}
   #v_preview .pvph button{font-family:inherit}
-  #v_preview .pv-hero{border-bottom:3px solid var(--bk);padding:8px 13px 7px}
+  #v_preview .pv-hero{border-bottom:3px solid var(--bk);padding:6px 13px 6px}
   #v_preview .pv-r{display:flex;align-items:center;gap:8px}
   #v_preview .pv-bw{justify-content:space-between}
   #v_preview .pv-co{font-weight:800;font-size:18px;letter-spacing:-.3px;color:#111}
@@ -1228,7 +1229,7 @@ function renderPreviewShell(){
   #v_preview .pv-rwlab{display:flex;justify-content:space-between;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)}
   #v_preview .pv-rwbar{height:9px;border:2px solid var(--bk);background:#fff;margin-top:3px}
   #v_preview .pv-rwfill{height:100%;background:var(--grn);width:100%}
-  #v_preview .pv-month{display:flex;align-items:center;gap:8px;padding:6px 13px;border-bottom:3px solid var(--bk);background:var(--ylw)}
+  #v_preview .pv-month{display:flex;align-items:center;gap:8px;padding:4px 13px;border-bottom:3px solid var(--bk);background:var(--ylw)}
   #v_preview .pv-mlab{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#111}
   #v_preview .pv-aplab{font-size:10px;font-weight:800;text-transform:uppercase;color:#5a4d00}
   #v_preview .pv-ap{margin-left:auto;font-family:var(--mono);font-weight:800;font-size:15px;letter-spacing:2px;color:#111}
@@ -1240,7 +1241,7 @@ function renderPreviewShell(){
   #v_preview .pv-feedhd{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:7px 13px 3px}
   #v_preview .pv-feed{flex:1;overflow-y:auto;padding:0 13px 10px}
   #v_preview .pv-empty{color:var(--mut);font-size:11px;padding:8px 0}
-  #v_preview .pv-post{border:2px solid var(--bk);background:#fff;padding:7px 9px;margin-bottom:7px}
+  #v_preview .pv-post{border:2px solid var(--bk);background:#fff;padding:6px 8px;margin-bottom:6px}
   #v_preview .pv-post.pv-me{border-left:6px solid var(--bk)}
   #v_preview .pv-post.pv-co{border-left:6px solid var(--mg)}
   #v_preview .pv-post.pv-world{background:#e7e2d5;border-style:dashed}
@@ -1248,25 +1249,25 @@ function renderPreviewShell(){
   #v_preview .pv-post.pv-how .pv-ptxt{white-space:pre-line}
   #v_preview .t-how{background:var(--ylw)}
   #v_preview .pv-world .pv-ptxt{font-style:italic;color:#3a362e}
-  #v_preview .pv-who{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
+  #v_preview .pv-who{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
   #v_preview .pv-ptxt{font-size:12px;line-height:1.35;color:#111}
   #v_preview .pv-pmeta{display:flex;gap:6px;align-items:center;margin-top:5px}
-  #v_preview .pv-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:2px 5px;border:2px solid var(--bk);color:#111}
+  #v_preview .pv-tag{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:1px 4px;border:1.5px solid var(--bk);color:#111;flex-shrink:0}
   #v_preview .t-post{background:var(--ylw)} #v_preview .t-raise{background:#fff} #v_preview .t-pivot{background:var(--mg);color:#fff}
   #v_preview .t-sale{background:var(--grn);color:#fff} #v_preview .t-news{background:#e8e4d8} #v_preview .t-boss{background:var(--rd);color:#fff}
   #v_preview .pv-gain{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--grn);margin-left:auto}
-  #v_preview .pv-nextw{padding:7px 13px;border-top:3px solid var(--bk);background:var(--paper)}
+  #v_preview .pv-nextw{padding:5px 13px 6px;border-top:3px solid var(--bk);background:var(--paper)}
   #v_preview .pv-next{width:100%;border:3px solid var(--bk);background:var(--bk);color:var(--paper);font-weight:800;
-    text-transform:uppercase;letter-spacing:1px;font-size:13px;padding:11px;box-shadow:4px 4px 0 var(--mut);cursor:pointer}
+    text-transform:uppercase;letter-spacing:1px;font-size:13px;padding:9px;box-shadow:4px 4px 0 var(--mut);cursor:pointer}
   #v_preview .pv-next.disabled{background:#fff;color:#bdb8ac;box-shadow:none;cursor:default}
   #v_preview .pv-thumb{display:flex;border-top:3px solid var(--bk);background:#fff}
-  #v_preview .pv-act{flex:1;padding:11px 2px 9px;text-align:center;border-right:2px solid var(--bk);background:#fff;cursor:pointer}
+  #v_preview .pv-act{flex:1;padding:6px 2px 5px;text-align:center;border-right:2px solid var(--bk);background:#fff;cursor:pointer}
   #v_preview .pv-act:last-child{border-right:0}
   #v_preview .pv-act.pivot{background:#fbe6f6} #v_preview .pv-act.ship{background:#fff7da}
   #v_preview .pv-act.off{opacity:.32}
-  #v_preview .pv-act .ic{font-size:18px;font-weight:800;line-height:1;color:#111}
-  #v_preview .pv-act .lab{font-size:10.5px;font-weight:800;text-transform:uppercase;margin-top:2px;letter-spacing:.3px;color:#111}
-  #v_preview .pv-act .cost{font-family:var(--mono);font-size:10px;color:var(--mut);font-weight:700}
+  #v_preview .pv-act .ic{font-size:15px;font-weight:800;line-height:1;color:#111}
+  #v_preview .pv-act .lab{font-size:10px;font-weight:800;text-transform:uppercase;margin-top:1px;letter-spacing:.3px;color:#111}
+  #v_preview .pv-act .cost{font-family:var(--mono);font-size:9px;color:var(--mut);font-weight:700}
   #v_preview .pv-scrim{position:absolute;inset:0;background:rgba(17,17,17,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:8}
   #v_preview .pv-scrim.on{opacity:1;pointer-events:auto}
   #v_preview .pv-sheet{position:absolute;left:8px;right:8px;bottom:16px;background:var(--paper);border:3px solid var(--bk);box-shadow:5px 5px 0 var(--bk);
@@ -1424,7 +1425,8 @@ function feedRowHTML(f){
   else {row="pv-world";who="In the world";}
   const gain=f.h?`<span class="pv-gain">+${fmt(f.h)}</span>`:"";
   const sub=f.sub?`<div class="pv-ptxt" style="font-style:italic;color:var(--mut);margin-top:2px">${(f.sub||"").replace(/</g,'&lt;')}</div>`:"";
-  return `<div class="pv-post ${row}"><div class="pv-who">${who}</div><div class="pv-ptxt">${(f.text||"").replace(/</g,'&lt;')}</div>${sub}<div class="pv-pmeta"><span class="pv-tag ${cls}">${(f.label||"").replace(/</g,'&lt;')}</span>${gain}</div></div>`;
+  // ÜKS metarida kahe asemel (kes · silt · gain) — Siimu tähelepanek 11.06: kaks infovälja raiskasid ~20px/kaart
+  return `<div class="pv-post ${row}"><div class="pv-who"><span>${who}</span><span class="pv-tag ${cls}">${(f.label||"").replace(/</g,'&lt;')}</span>${gain}</div><div class="pv-ptxt">${(f.text||"").replace(/</g,'&lt;')}</div>${sub}</div>`;
 }
 function renderSheetBody(){
   if(!pvSheet||pvSheet==="boss"||pvSheet==="offer"||pvSheet==="skins")return;const body=document.getElementById("pv_sheetbody"),ttl=document.getElementById("pv_sheettitle");
