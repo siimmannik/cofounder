@@ -101,6 +101,8 @@
       padding-right:max(env(safe-area-inset-right,0px),7px)}
     #v_preview .pv-hero{border-top:3px solid #111}
     #v_preview .pv-thumb{border-bottom:3px solid #111}
+    /* toastid ÜLES (mitte nuppude/sheetide peale) ja kitsamad — ei sega mängimist */
+    #toasts{bottom:auto;top:calc(env(safe-area-inset-top,12px) + 6px);right:10px;max-width:72%}
   }
   /* täisekraanis pole status-bari — võta 44px reserv maha, mäng saab kogu ekraani */
   html:fullscreen #v_preview .pvph{padding-top:max(env(safe-area-inset-top,0px),8px)!important}
@@ -973,9 +975,8 @@ function monthlyEvent(){
   else if(e.type==="buff"){const a=(B().clickHype||1500)*(e.hypeBoost||8)*buzzMult()*credMult()*(P.pivotHypeMod||1);P.hype+=a;P.totalHype+=a;msg="+"+fmt(a)+" hype";}
   else if(e.type==="debuff"){const loss=P.funding*(e.debuffPct||0.15);P.funding-=loss;msg="−$"+fmt(loss);}
   else if(e.type==="hype"){const before=P.hype;P.hype*=(e.hypeMult!=null?e.hypeMult:1);const d=Math.round(P.hype-before);msg=(d>=0?"+":"")+fmt(d)+" hype";}
-  const bad=e.type==="debuff"||(e.type==="hype"&&(e.hypeMult!=null?e.hypeMult:1)<1);
   feedPush({text:e.title+(msg?"  "+msg:""),sub:e.body,h:0,label:"event"});
-  toast(bad?"bad":"good",e.title,e.body+(msg?"  ("+msg+")":""));
+  // toasti EI tee — sama info on juba feedi-kaardina (topelt-popup segas mängimist, Siimu flag 11.06)
 }
 function downRound(){
   P.hype*=(1-(B().downRoundLoss||0.4));P.totalHype*=(1-(B().downRoundLoss||0.4));
@@ -1326,8 +1327,8 @@ function renderPreviewShell(){
         <div class="pv-vbig" id="pv_val">$0</div>
         <div class="pv-goalw">
           <div class="pv-goalbar"><div class="pv-goalfill" id="pv_goalfill"></div><div class="pv-gtick" style="left:40%"></div><div class="pv-gtick" style="left:80%"></div></div>
-          <div class="pv-goallabs"><span id="pv_ms1" style="left:40%">$1M</span><span id="pv_ms2" style="left:80%">$100M</span><span id="pv_ms3" style="left:100%;transform:translateX(-100%)">$1B 🦄</span></div>
         </div>
+        <span style="font-size:15px;flex-shrink:0">🦄</span>
       </div>
       <div class="pv-stats">
         <div class="pv-st"><div class="k">Hype</div><div class="v" id="pv_hype">0</div></div>
@@ -1645,7 +1646,7 @@ function shareCard(win,bought,acq){
 //=================== HELPERS ===================
 function fmt(n){if(n===Infinity)return"∞";if(n<1000)return (n<10&&n%1!==0)?n.toFixed(1):Math.round(n).toString();
   const u=["","K","M","B","T","Qa","Qi"];let i=0;while(n>=1000&&i<u.length-1){n/=1000;i++}return n.toFixed(2).replace(/\.?0+$/,"")+u[i]}
-function toast(cls,t,b){const e=document.createElement("div");e.className="toast "+cls;e.innerHTML=`<b>${t}</b><br>${b}`;document.getElementById("toasts").appendChild(e);setTimeout(()=>{e.style.opacity=0;e.style.transition=".4s";setTimeout(()=>e.remove(),400)},4500)}
+function toast(cls,t,b){const tt=document.getElementById("toasts");while(tt.children.length>=2)tt.firstChild.remove();const e=document.createElement("div");e.className="toast "+cls;e.innerHTML=`<b>${t}</b><br>${b}`;tt.appendChild(e);setTimeout(()=>{e.style.opacity=0;e.style.transition=".4s";setTimeout(()=>e.remove(),400)},3500)}
 function modal(t,b,no,yes,onNo,onYes){document.getElementById("mt").textContent=t;document.getElementById("mb").textContent=b;
   document.getElementById("mno").textContent=no;document.getElementById("myes").textContent=yes;
   const m=document.getElementById("modal");m.style.display="flex";
