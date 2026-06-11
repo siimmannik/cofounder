@@ -139,11 +139,11 @@
 <script>
 //=================== SEED ===================
 const SEED = {
-  meta:{version:"0.9"},
+  meta:{version:"1.0"},
   balance:{
     clickHype:4200, marketRate:0.5, passiveFundingRate:0.15, valuationFactor:25, costGrowth:1.15,
     pivotTaxPct:0.15, raiseBase:250, raiseGrowth:3.5, raiseRate:7, pivotAP:1, maxPivotPerMonth:1,
-    downRoundLoss:0.4, apPerMonth:3, totalMonths:10, unicornGoal:1000000000, decayPerMonth:22, bossTriggerValuation:50000000,
+    downRoundLoss:0.4, apPerMonth:3, totalMonths:12, unicornGoal:1000000000, decayPerMonth:22, bossTriggerValuation:50000000,
     ratioChance:0.25, ratioRiskAbove:1.5, ratioFatiguePct:0.12, saleChance:0.30, saleDecay:0.7, buyoutChance:0.4, millionaireValuation:1000000, levelUpValuation:100000000, hearingValuation:500000000, cofounderValuation:200000000, monthDripSeconds:20, dilutionPerRound:0.12, postHand:2, shipHand:2, overheadBurnPct:0.012, momentumCapPct:0.03, hireBurnMult:12, hireHypeMult:20, hireOfferChance:0.5
   },
   upgrades:[
@@ -399,7 +399,7 @@ const SEED = {
 //=================== STATE ===================
 function clone(o){return JSON.parse(JSON.stringify(o))}
 let S = load() || clone(SEED);
-if(!S||!S.meta||S.meta.version!=="0.9"||(S.upgrades&&S.upgrades[0]&&S.upgrades[0].insider)) S = clone(SEED);
+if(!S||!S.meta||S.meta.version!=="1.0"||(S.upgrades&&S.upgrades[0]&&S.upgrades[0].insider)) S = clone(SEED);
 if(!S.flavor) S.flavor = clone(SEED.flavor);
 if(S.flavor && !S.flavor.levelUp) S.flavor.levelUp = clone(SEED.flavor.levelUp);
 if(S.flavor && !S.flavor.shipItems) S.flavor.shipItems = clone(SEED.flavor.shipItems);
@@ -570,7 +570,7 @@ function renderBalance(){
   const B=S.balance;
   const fields=[
     ["apPerMonth","AP / month","Action points per month (3 — every move counts; unused AP becomes doomscrolling)"],
-    ["totalMonths","year length","Months in a run (10 — short and tense)"],
+    ["totalMonths","year length","Months in a run (12 — Siimu valik 11.06: andestab õppimist; algaja võidu-% ~2×)"],
     ["unicornGoal","unicorn goal $","Valuation that counts as a win ($1B)"],
     ["clickHype","post hype base","Hype per post (× angle × buzz)"],
     ["valuationFactor","valuation factor","Valuation = Hype × buzzword-mult × this"],
@@ -1341,7 +1341,7 @@ function renderPreviewShell(){
       </div>
     </div>
     <div class="pv-month">
-      <span class="pv-mlab" id="pv_month">Month 1 / 10</span>
+      <span class="pv-mlab" id="pv_month">Month 1 / 12</span>
       <span class="pv-ap" id="pv_ap" style="margin-left:auto"></span>
       ${adv?`<button class="pv-restart" id="pvskins" style="margin-left:6px" title="Skins">🎨</button>`:""}
       <button class="pv-restart" id="pvfull" style="margin-left:6px" title="Fullscreen">⛶</button>
