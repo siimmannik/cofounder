@@ -139,7 +139,7 @@
 <script>
 //=================== SEED ===================
 const SEED = {
-  meta:{version:"1.0"},
+  meta:{version:"1.1"},
   balance:{
     clickHype:4200, marketRate:0.5, passiveFundingRate:0.15, valuationFactor:25, costGrowth:1.15,
     pivotTaxPct:0.15, raiseBase:250, raiseGrowth:3.5, raiseRate:7, pivotAP:1, maxPivotPerMonth:1,
@@ -159,18 +159,18 @@ const SEED = {
   ],
   buzzwords:[
     {id:"bigdata",name:"Big Data",flavor:"Leveraging your private life.",mult:1,band:"plausible"},
-    {id:"ml",name:"Machine Learning",flavor:"Looking for the meaning of it all.",mult:1.6,band:"plausible"},
-    {id:"ai",name:"AI",flavor:"The winter is not coming. Not coming.",mult:2.5,band:"plausible"},
-    {id:"genai",name:"Generative AI",flavor:"Cats, dogs, and creative political leadership.",mult:4,band:"plausible"},
+    {id:"ml",name:"Machine Learning",flavor:"Statistics with a marketing budget.",mult:1.6,band:"plausible"},
+    {id:"ai",name:"AI",flavor:"This winter will be different.",mult:2.5,band:"plausible"},
+    {id:"genai",name:"Generative AI",flavor:"Infinite content. Finite ideas.",mult:4,band:"plausible"},
     {id:"llm",name:"Large Language Models",flavor:"Yes, it was your IP, but think of the Chinese!",mult:6.5,band:"plausible"},
-    {id:"agentic",name:"Agentic AI",flavor:"Gotta have faith, 'cause we're past knowing.",mult:10,band:"plausible"},
+    {id:"agentic",name:"Agentic AI",flavor:"Like interns, but confident.",mult:10,band:"plausible"},
     {id:"agents",name:"AI agents",flavor:"Finally we can all be middle managers.",mult:16,band:"plausible"},
     {id:"agi",name:"AGI",flavor:"Probably here already.",mult:26,band:"plausible"},
     {id:"physical",name:"Physical AI",flavor:"They can dance! And swarm-kill.",mult:42,band:"stretching"},
     {id:"asi",name:"Superintelligence",flavor:"If it doesn't kill you... if.",mult:70,band:"stretching"},
-    {id:"quantum",name:"Quantum AI",flavor:"On a highway to, well...",mult:120,band:"absurd"},
+    {id:"quantum",name:"Quantum AI",flavor:"Overhyped and underhyped until observed.",mult:120,band:"absurd"},
     {id:"tokenmax",name:"Tokenmaxxing",flavor:"Enjoying it while it lasts.",mult:200,band:"absurd"},
-    {id:"valuemax",name:"Valuemaxxing",flavor:"They put the brakes on.",mult:340,band:"absurd"},
+    {id:"valuemax",name:"Valuemaxxing",flavor:"Nobody knows what it is. That's the value.",mult:340,band:"absurd"},
     {id:"secagents",name:"Secure personal agents",flavor:"Why not use your own computer for a change.",mult:580,band:"absurd"}
   ],
   events:[
@@ -276,7 +276,10 @@ const SEED = {
       "Quietly building the rails for a world we can't yet describe.",
       "We're not a product company. We're a thesis.",
       "Default-alive, mission-driven, narrative-first.",
-      "Compounding leverage across the modern {buzz} stack."
+      "Compounding leverage across the modern {buzz} stack.",
+      "Pre-revenue by design.",
+      "The exit is the product.",
+      "Solving intelligence. Then everything else. Then invoicing."
     ],
     headlines:[
       "A solo founder raised $40M this week for a {buzz} layer on top of other {buzz} layers. The round was oversubscribed.",
@@ -288,7 +291,10 @@ const SEED = {
       "This quarter's consensus: revenue is a lagging indicator of vision.",
       "A rival closed a Series B on a single slide reading '{buzz}' in Helvetica.",
       "Several founders updated their bios to 'building.' The sector is heating up.",
-      "The market remains highly conviction-driven this quarter."
+      "The market remains highly conviction-driven this quarter.",
+      "A unicorn announced layoffs and a vision, in that order.",
+      "An AI fund raised a fund to invest in AI funds. Oversubscribed.",
+      "Your category was declared dead and reborn twice this week."
     ],
     prWin:"FOR IMMEDIATE RELEASE — {name} today announced a {val} valuation, establishing the company as a definitional player in {buzz}. After {months} months of focused execution, the founder confirmed the company is pursuing a non-linear, category-creating approach to {buzz}, with revenue intentionally deferred to preserve optionality and narrative integrity. 'We're just getting started,' the founder said. {name} is hiring across all functions.",
     prLose:"FOR IMMEDIATE RELEASE — {name} today announced a strategic transition into a reflective, founder-led next chapter. After {months} months pioneering {buzz}, the company made the difficult and courageous decision to extend its runway indefinitely. The founder, who remains incredibly energized about what's next, will take on advisory and angel roles effective immediately. {name} peaked at a {val} valuation. The {buzz} thesis, sources maintain, was directionally correct.",
@@ -329,7 +335,9 @@ const SEED = {
       "a browser-based version of the desktop app. But why?",
       "advanced user-based rights management. So everyone can't read your email.",
       "AI-optimized neural buffering. To explain the slow downloads.",
-      "transparent layering. Self-explanatory.",
+      "transparent layering. (No one has asked.)",
+      "an AI roadmap generator (it generated this roadmap)",
+      "usage analytics that round up",
       "a cool new feature. Your biggest competitor out-tweeted you by 15 minutes.",
       "a biometric analysis toolkit. You can no longer use cats in profile pictures.",
       "support for multimodal portfolio management. Can now use cat videos in customer emails.",
@@ -379,7 +387,15 @@ const SEED = {
       "@panelmoderator: would love to have you speak (unpaid).",
       "1 retweet, 0 customers, 4 quote-tweets calling you delusional.",
       "@yc_w19: congrats on the milestone (which milestone)",
-      "@cynic.bsky: the valuation went up and the product went nowhere."
+      "@cynic.bsky: the valuation went up and the product went nowhere.",
+      "@dueDiligenceDan: checked the backend. there is no backend.",
+      "@LP_whisperer: we marked this position to zero in March.",
+      "@tokenizer: counted. most of them were 'the'.",
+      "@formeremployee2: the demo is hardcoded. source: I hardcoded it.",
+      "@founder_therapist: and how does the runway make you feel?",
+      "@indexfund_enjoyer: this is why I don't pick stocks.",
+      "@patentbot: this post is prior art now.",
+      "@unicorn_obituaries: bookmarked. you know why."
     ],
     ratioReplies:[
       "the quote-tweets formed their own conference.",
@@ -399,7 +415,7 @@ const SEED = {
 //=================== STATE ===================
 function clone(o){return JSON.parse(JSON.stringify(o))}
 let S = load() || clone(SEED);
-if(!S||!S.meta||S.meta.version!=="1.0"||(S.upgrades&&S.upgrades[0]&&S.upgrades[0].insider)) S = clone(SEED);
+if(!S||!S.meta||S.meta.version!=="1.1"||(S.upgrades&&S.upgrades[0]&&S.upgrades[0].insider)) S = clone(SEED);
 if(!S.flavor) S.flavor = clone(SEED.flavor);
 if(S.flavor && !S.flavor.levelUp) S.flavor.levelUp = clone(SEED.flavor.levelUp);
 if(S.flavor && !S.flavor.shipItems) S.flavor.shipItems = clone(SEED.flavor.shipItems);
@@ -881,14 +897,17 @@ const NEMESIS_LINES=[
   "📰 {name} hired three VPs of AI in one week. {val} and climbing.",
   "📰 Leaked: {name}'s product is a spreadsheet. The valuation rose to {val} on the news.",
   "📰 {name} got a profile titled 'The Anti-Hype Founder'. It mentions hype 31 times. {val}.",
-  "📰 {name} declared this 'the year of agents'. Investors nodded slowly. {val}."
+  "📰 {name} declared this 'the year of agents'. Investors nodded slowly. {val}.",
+  "📰 {name}'s founder bought a watch that costs more than your runway. {val}.",
+  "📰 {name} is 'profitable on a vibes-adjusted basis', says their CFO. {val}."
 ];
 const IDLE_LINES=[
   "You spent the rest of the month doomscrolling. The feed won. It always does.",
   "Unused energy went into rearranging the Notion workspace. It is beautiful now. Nothing else changed.",
   "You drafted four posts and published none. 'Strategic silence,' you tell the team.",
   "The remaining time was spent A/B testing your own LinkedIn banner.",
-  "You attended a founder dinner. Everyone pitched everyone. Nobody listened."
+  "You attended a founder dinner. Everyone pitched everyone. Nobody listened.",
+  "You rebalanced the fantasy cap table again. It's beautiful. It's not real."
 ];
 function nextMonth(){
   if(!P||P.over)return;
@@ -944,6 +963,13 @@ function maybeHailMary(){
       {label:"Pass — dignity is a moat",resolve:()=>{feedPush({text:"Passed on the 'strategic' mega-round. The fund led your rival's round instead.",h:0,label:"founder"});}}
     ]});
 }
+const HIRE_DM_LINES=[
+  "Their cover letter is a thread.",
+  "They list 'founder energy' under technical skills.",
+  "Their last three employers no longer exist.",
+  "They open with 'big fan of the vision'. They have not seen the product. (Nobody has.)",
+  "Recruiter says they're 'a culture add'. The culture is LinkedIn."
+];
 function maybeHireOffer(){
   if(!P||P.over||pvSheet)return; // never stack on a boss / open sheet
   const m=document.getElementById("modal");if(m&&m.style.display==="flex")return; // or on a choice-event modal
@@ -952,7 +978,7 @@ function maybeHireOffer(){
   if(!pool.length)return;
   const u=pool[Math.floor(rng()*pool.length)],c=costOf(u);
   bossModal({optional:true,header:"📩 Inbound",title:"Talent slid into your DMs",
-    body:u.name+" — "+(u.flavor||"")+" Joining adds +"+fmt((u.hype||0)*(B().hireHypeMult||1))+" hype/mo and +$"+fmt((u.burn||0)*(B().hireBurnMult||1))+" burn/mo.",
+    body:pick(HIRE_DM_LINES)+" "+u.name+" — "+(u.flavor||"")+" Joining adds +"+fmt((u.hype||0)*(B().hireHypeMult||1))+" hype/mo and +$"+fmt((u.burn||0)*(B().hireBurnMult||1))+" burn/mo.",
     options:[
       {label:"Hire — $"+fmt(c)+" (no AP, just money)",resolve:()=>{P.funding-=c;P.owned[u.id]=(P.owned[u.id]||0)+1;feedPush({text:"Hired: "+u.name,sub:u.flavor,h:0,label:"hire"});toast("good","Hired",u.name);}},
       {label:"Pass — protect the burn",resolve:()=>{feedPush({text:"Passed on "+u.name+". They joined a competitor and posted a thread about it.",h:0,label:"hire"});}}
