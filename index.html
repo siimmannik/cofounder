@@ -1592,8 +1592,7 @@ function pvRender(){
   }
   const nbtn=g("pv_next");
   if(P.over){nbtn.className="pv-next disabled";nbtn.textContent="Run over";}
-  else if(P.ap>0){nbtn.className="pv-next";nbtn.textContent="Next month → (skip "+P.ap+" AP)";}
-  else {nbtn.className="pv-next";nbtn.textContent="Next month →";}
+  else {nbtn.className="pv-next";nbtn.textContent="Next month →";} // "(skip N AP)" maha — AP-täpid kuu-ribal + doomscroll-kaart ütlevad sama (Siim 11.06)
   if(pvSheet&&pvSheet!=="boss"&&pvSheet!=="offer"&&!P.over)renderSheetBody(); else if(P.over)closeSheet(); // boss/offer sheets render themselves — don't let pvRender wipe them
   const end=g("pv_end");
   if(P.over){
