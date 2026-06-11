@@ -96,7 +96,7 @@
       /* hoia mäng telefoni status-bari alt väljas — safe-area katab notchi, lisapolster pole vaja
          (vana +44px oli Androidi HTML-vieweri jaoks; veebis/PWA-s raiskas iPhone'il ~60px) */
       padding-top:max(env(safe-area-inset-top,12px),12px);
-      padding-bottom:calc(env(safe-area-inset-bottom,0px) + 6px);
+      padding-bottom:calc(env(safe-area-inset-bottom,0px) + 3px);
       padding-left:max(env(safe-area-inset-left,0px),7px);
       padding-right:max(env(safe-area-inset-right,0px),7px)}
     #v_preview .pv-hero{border-top:3px solid #111}
@@ -1203,17 +1203,17 @@ function renderPreviewShell(){
   #v_preview .pv-r{display:flex;align-items:center;gap:8px}
   #v_preview .pv-bw{justify-content:space-between}
   #v_preview .pv-co{font-weight:800;font-size:18px;letter-spacing:-.3px;color:#111}
-  #v_preview .pv-rebrand{font-size:17px;line-height:1;font-weight:800;border:2px solid var(--bk);min-width:40px;height:38px;padding:0 8px;background:var(--ylw);color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  #v_preview .pv-rebrand{font-size:24px;line-height:1;font-weight:800;border:2px solid var(--bk);min-width:40px;height:38px;padding:0 8px;background:var(--ylw);color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   #v_preview .pv-restart{font-size:11px;font-weight:800;border:2px solid var(--bk);padding:8px 11px;background:#fff;color:#111;text-transform:uppercase;cursor:pointer}
   #v_preview .pv-revpill{font-family:var(--mono);font-weight:700;font-size:12px;background:var(--rd);color:#fff;border:2px solid var(--bk);padding:2px 7px;white-space:nowrap}
   #v_preview .pv-tag2{font-size:10.5px;color:var(--mut);font-style:italic;margin-top:2px}
   #v_preview .pv-status{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
   #v_preview .pv-chip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;border:2px solid var(--bk);padding:2px 5px;background:#fff;color:#111;white-space:nowrap}
   #v_preview .pv-chip.lvl{background:var(--ylw)}
-  #v_preview .pv-vlab{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-top:4px}
-  #v_preview .pv-vbig{font-family:var(--mono);font-weight:800;font-size:38px;line-height:1;letter-spacing:-1px;color:#111}
+  #v_preview .pv-vrow{display:flex;align-items:center;gap:10px;margin-top:6px} /* number + siht-riba ÜHEL real (Siimu soov 11.06) */
+  #v_preview .pv-vbig{font-family:var(--mono);font-weight:800;font-size:26px;line-height:1;letter-spacing:-1px;color:#111;flex-shrink:0}
   #v_preview .pv-vsub{font-size:10.5px;color:var(--mut);font-style:italic;margin-top:2px}
-  #v_preview .pv-goalw{margin-top:7px}
+  #v_preview .pv-goalw{flex:1;min-width:0}
   #v_preview .pv-goalbar{position:relative;height:9px;border:2px solid var(--bk);background:#fff}
   #v_preview .pv-goalfill{height:100%;background:var(--bk);width:0%}
   #v_preview .pv-gtick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--bk)}
@@ -1288,7 +1288,7 @@ function renderPreviewShell(){
   #v_preview .pv-proj{font-family:var(--mono);font-weight:800;font-size:11px;color:var(--grn);margin-left:auto}
   #v_preview .pv-cnote{font-size:10px;color:var(--mut)}
   #v_preview .pv-end{position:absolute;inset:0;background:rgba(244,241,233,.96);z-index:10;display:flex;align-items:center;justify-content:center;padding:18px}
-  #v_preview .pv-adband{flex-shrink:0;height:58px;margin:6px 0 0;border:2px solid var(--bk);background:#fff;display:flex;align-items:center;gap:8px;padding:0 8px;overflow:hidden}
+  #v_preview .pv-adband{flex-shrink:0;height:54px;margin:4px 0 0;border:2px solid var(--bk);background:#fff;display:flex;align-items:center;gap:8px;padding:0 8px;overflow:hidden}
   #v_preview .pv-adlogo{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;border:2px solid var(--bk)}
   #v_preview .pv-adtxt{flex:1;min-width:0;font-size:11px;line-height:1.35;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #v_preview .pv-adtxt b{font-weight:800}
@@ -1302,7 +1302,7 @@ function renderPreviewShell(){
   #v_preview .pv-act.pulse{animation:pvpulse 1.1s ease-in-out infinite}
   @keyframes pvpulse{0%,100%{background:#fff}50%{background:var(--ylw)}}
   #v_preview .pv-hero.compact .pv-tag2,#v_preview .pv-hero.compact .pv-status,#v_preview .pv-hero.compact .pv-stats,#v_preview .pv-hero.compact .pv-rww{display:none}
-  #v_preview .pv-hero.compact .pv-vbig{font-size:28px}
+  #v_preview .pv-hero.compact .pv-vbig{font-size:21px}
   #v_preview .pv-hero.compact{padding-bottom:8px}
   #v_preview .pv-meter{border:2px solid var(--bk);padding:8px 10px;margin:0 0 10px;background:#fff}
   #v_preview .pv-meter.ok{border-left:6px solid var(--grn)} #v_preview .pv-meter.warn{border-left:6px solid var(--rd)}
@@ -1321,13 +1321,13 @@ function renderPreviewShell(){
         <span class="pv-revpill" id="pv_rev">REVENUE $0</span>
       </div>
       <div class="pv-tag2" id="pv_tagline"></div>
-      <div class="pv-tag2" id="pv_hq"></div>
       <div class="pv-status" id="pv_status"></div>
-      <div class="pv-vlab">Valuation</div>
-      <div class="pv-vbig" id="pv_val">$0</div>
-      <div class="pv-goalw">
-        <div class="pv-goalbar"><div class="pv-goalfill" id="pv_goalfill"></div><div class="pv-gtick" style="left:40%"></div><div class="pv-gtick" style="left:80%"></div></div>
-        <div class="pv-goallabs"><span id="pv_ms1" style="left:40%">$1M</span><span id="pv_ms2" style="left:80%">$100M</span><span id="pv_ms3" style="left:100%;transform:translateX(-100%)">$1B 🦄</span></div>
+      <div class="pv-vrow">
+        <div class="pv-vbig" id="pv_val">$0</div>
+        <div class="pv-goalw">
+          <div class="pv-goalbar"><div class="pv-goalfill" id="pv_goalfill"></div><div class="pv-gtick" style="left:40%"></div><div class="pv-gtick" style="left:80%"></div></div>
+          <div class="pv-goallabs"><span id="pv_ms1" style="left:40%">$1M</span><span id="pv_ms2" style="left:80%">$100M</span><span id="pv_ms3" style="left:100%;transform:translateX(-100%)">$1B 🦄</span></div>
+        </div>
       </div>
       <div class="pv-stats">
         <div class="pv-st"><div class="k">Hype</div><div class="v" id="pv_hype">0</div></div>
@@ -1466,6 +1466,7 @@ function renderSheetBody(){
     ];
     if(P.nemesis)rows.push(["Rival: "+P.nemesis.name,P.nemesis.won?"$1B 🙃":"$"+fmt(P.nemesis.val)]);
     rows.push(["📁 Paper trail",ptGrade()+" ("+Math.round(P.paperTrail||0)+")"]);
+    rows.push(["🏢 HQ",hqName()]); // flavor — kolis hero'st siia (11.06, ruum)
     const rrow=r=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px dashed #c9c4b6"><span style="color:var(--mut);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px">${r[0]}</span><span style="font-family:var(--mono);font-weight:700;color:#111">${r[1]}</span></div>`;
     h=`<p class="pv-hint">The numbers investors don't ask about.</p>`+rows.map(rrow).join("");
     const career=[
@@ -1522,7 +1523,6 @@ function pvRender(){
   g("pv_ap").textContent=dots;
   g("pv_name").textContent=P.name||"";
   g("pv_tagline").textContent=(P.tagline||"").replace(/\{buzz\}/g,curBuzz().name);
-  const hq=g("pv_hq");if(hq)hq.textContent="🏢 "+hqName();
   const st=g("pv_status");if(st)st.innerHTML='<span class="pv-chip">👤 '+((P.archName||"The Dropout").replace(/</g,'&lt;'))+'</span><span class="pv-chip lvl">🏆 '+founderLevel()+'</span><span class="pv-chip">⭐ '+(META.founderCred||0)+' cred</span>';
   g("pv_hype").textContent=fmt(P.hype);
   g("pv_fund").textContent="$"+fmt(P.funding);
