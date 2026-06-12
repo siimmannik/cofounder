@@ -1686,14 +1686,18 @@ function shareCard(win,bought,acq){
   x.fillStyle=paper;x.fillRect(0,0,W,H);
   x.strokeStyle=bk;x.lineWidth=14;x.strokeRect(28,28,W-56,H-56);
   const cx=W/2;
+  // teksti mähkimise fix (Siim 12.06): mõõdame measureText-iga — kastides kahaneb font, ridadel sõnapiiri-ellips
+  const FF=(w,s)=>w+" "+s+"px Helvetica,Arial,sans-serif";
+  const fit=(txt,maxW,w,s,min)=>{x.font=FF(w,s);while(x.measureText(txt).width>maxW&&s>min){s--;x.font=FF(w,s);}};
+  const ell=(txt,maxW)=>{if(x.measureText(txt).width<=maxW)return txt;let t=txt;while(t.length>2&&x.measureText(t+"…").width>maxW){const t2=t.replace(/\s+\S*$/,"");t=(t2===t||!t2)?t.slice(0,-2):t2;}return t+"…";};
   x.textAlign="center";x.fillStyle=bk;
   x.font="800 34px Helvetica,Arial,sans-serif";x.fillText("COFOUNDER — the real AI-ntrepreneur game",cx,160);
   const ttl=acq?"ACQUIHIRED":(bought?"ACQUIRED":(win?"UNICORN":"YEAR OVER"));
   x.fillStyle=win?grn:(acq?"#b8860b":rd);x.fillRect(90,250,W-180,170);
   x.fillStyle="#fff";x.font="800 96px Helvetica,Arial,sans-serif";x.fillText(ttl,cx,372);
-  x.fillStyle=bk;x.font="800 62px Helvetica,Arial,sans-serif";x.fillText((P.name||"").slice(0,28),cx,560);
+  x.fillStyle=bk;fit((P.name||""),W-220,"800",62,36);x.fillText((P.name||""),cx,560);
   x.fillStyle=mut;x.font="italic 30px Helvetica,Arial,sans-serif";
-  const tg=(P.tagline||"").replace(/\{buzz\}/g,curBuzz().name);x.fillText(tg.slice(0,52),cx,618);
+  const tg=(P.tagline||"").replace(/\{buzz\}/g,curBuzz().name);x.fillText(ell(tg,W-200),cx,618);
   x.fillStyle=bk;x.font="800 26px Helvetica,Arial,sans-serif";x.fillText("FOUNDER: "+(P.archName||"The Dropout").toUpperCase(),cx,672);
   x.fillStyle=mut;x.font="800 30px Helvetica,Arial,sans-serif";x.fillText("PEAK VALUATION",cx,820);
   x.fillStyle=bk;x.font="800 184px Helvetica,Arial,sans-serif";x.fillText("$"+fmt(P.peakVal||valuation()),cx,1010);
@@ -1702,13 +1706,13 @@ function shareCard(win,bought,acq){
   const bw=(W-180)/3;x.lineWidth=6;
   stats.forEach((s,i)=>{const bx=90+i*bw;x.strokeStyle=bk;x.strokeRect(bx,1210,bw,210);
     x.fillStyle=mut;x.font="800 24px Helvetica,Arial,sans-serif";x.fillText(s[0],bx+bw/2,1285);
-    x.fillStyle=bk;x.font="800 46px Helvetica,Arial,sans-serif";x.fillText((s[1]||"").toString().slice(0,14),bx+bw/2,1360);});
+    const vs=(s[1]||"").toString();x.fillStyle=bk;fit(vs,bw-26,"800",46,22);x.fillText(vs,bx+bw/2,1360);});
   x.fillStyle="#b8860b";x.font="800 38px Helvetica,Arial,sans-serif";
   x.fillText("In the founder's pocket: $"+fmt(pocketMoney()),cx,1530);
   if((P.usedShips||[]).length){x.fillStyle=mut;x.font="italic 28px Helvetica,Arial,sans-serif";
-    const ds="Last shipped: "+(pick(P.usedShips)||"").replace(/[.\s]+$/,"");x.fillText(ds.slice(0,60),cx,1600);}
+    const ds="Last shipped: "+(pick(P.usedShips)||"").replace(/[.\s]+$/,"");x.fillText(ell(ds,W-180),cx,1600);}
   const extra=(P.nemesis&&P.nemesis.won)?("RIVAL "+(P.nemesis.name||"").toUpperCase()+" GOT THERE FIRST"):(((P.paperTrail||0)>=2)?("PAPER TRAIL: "+ptGrade().toUpperCase()):"");
-  if(extra){x.fillStyle=bk;x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(extra,cx,1670);}
+  if(extra){x.fillStyle=bk;x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(ell(extra,W-180),cx,1670);}
   x.fillStyle=ylw;x.fillRect(90,1730,W-180,150);
   // bränd-plokk: äpi-ikoon ($0 ruut) + mängu nimi + slogan (Siim 11.06 — jagataval kaardil peab nimi peal olema)
   const tName="COFOUNDER",tSlog="Raise billions. Build nothing.";
