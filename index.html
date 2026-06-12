@@ -1301,8 +1301,9 @@ function renderPreviewShell(){
   #v_preview .pv-st .v{font-family:var(--mono);font-weight:700;font-size:14px;margin-top:1px;color:#111}
   #v_preview .pv-rww{margin-top:7px}
   #v_preview .pv-rwlab{display:flex;justify-content:space-between;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)}
-  #v_preview .pv-rwbar{height:9px;border:2px solid var(--bk);background:#fff;margin-top:3px}
+  #v_preview .pv-rwbar{height:9px;border:2px solid var(--bk);background:#fff;margin-top:3px;display:flex}
   #v_preview .pv-rwfill{height:100%;background:var(--grn);width:100%}
+  #v_preview #pv_rwburn{height:100%;background:var(--rd)} /* selle kuu burn — punane tükk kassast */
   #v_preview .pv-month{display:flex;align-items:center;gap:8px;padding:4px 13px;border-bottom:3px solid var(--bk);background:var(--ylw)}
   #v_preview .pv-mlab{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#111}
   #v_preview .pv-aplab{font-size:10px;font-weight:800;text-transform:uppercase;color:#5a4d00}
@@ -1409,8 +1410,8 @@ function renderPreviewShell(){
         <div class="pv-st" id="pv_more" style="cursor:pointer"><div class="k">Financials</div><div class="v">ⓘ</div></div>
       </div>
       <div class="pv-rww">
-        <div class="pv-rwlab"><span>Runway</span><span id="pv_rw"></span></div>
-        <div class="pv-rwbar"><div class="pv-rwfill" id="pv_rwbar"></div></div>
+        <div class="pv-rwlab"><span id="pv_rwlabel">Runway</span><span id="pv_rw"></span></div>
+        <div class="pv-rwbar"><div class="pv-rwfill" id="pv_rwbar"></div><div id="pv_rwburn"></div></div>
       </div>
     </div>
     <div class="pv-month">
@@ -1595,10 +1596,16 @@ function pvRender(){
   g("pv_hype").textContent=fmt(P.hype);
   g("pv_fund").textContent="$"+fmt(P.funding);
   g("pv_rev").textContent="REVENUE $0"; // the joke: officially $0 forever, no matter how many "real sales" happen
-  const rw=runwayMo();
-  g("pv_rw").textContent=rw===Infinity?"∞":fmt(rw)+" mo";
-  g("pv_rwbar").style.width=(rw===Infinity?100:Math.max(2,Math.min(100,rw/12*100)))+"%";
-  g("pv_rwbar").style.background=rw<2?"var(--rd)":rw<5?"#d9a400":"var(--grn)";
+  // Runway-riba = KASSA, millest punane tükk on SELLE kuu burn (Siim 12.06: "roheline riba, aga down-round" oli segadus —
+  // burn võetakse kuu lõpus ja kasvab valuationiga). Kui burn ≥ kassa → kogu riba punane + "Down-round incoming".
+  const rw=runwayMo(),burnNow=burnMo();
+  const drIncoming=P.funding<=0||burnNow>=P.funding;
+  g("pv_rw").textContent=(rw===Infinity?"∞":fmt(rw)+" mo")+" · burn $"+fmt(burnNow)+"/mo";
+  const lbl=g("pv_rwlabel");if(lbl){lbl.textContent=drIncoming?"⚠ Down-round incoming":"Runway";lbl.style.color=drIncoming?"var(--rd)":"";}
+  const burnPct=drIncoming?100:Math.min(100,burnNow/Math.max(P.funding,1)*100);
+  const rb=g("pv_rwburn");if(rb)rb.style.width=burnPct+"%";
+  g("pv_rwbar").style.width=Math.max(0,100-burnPct)+"%";
+  g("pv_rwbar").style.background=rw<5?"#d9a400":"var(--grn)";
   updateGoalBar();
   const cb=curBuzz();
   g("pv_buzzname").textContent=cb.name;
