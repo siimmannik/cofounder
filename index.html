@@ -693,9 +693,11 @@ function animVal(){const el=document.getElementById("pv_val");if(!P||!el){valAni
 function popText(t,col){const d=document.createElement("div");d.textContent=t;d.style.cssText="position:fixed;left:50%;top:98px;font-family:var(--mono);font-weight:700;font-size:18px;color:"+(col||"var(--accent)")+";pointer-events:none;z-index:60;animation:popup 1s ease-out forwards";document.body.appendChild(d);setTimeout(()=>d.remove(),1000);}
 function flashHero(){const hc=document.getElementById("pv_hero");if(hc){hc.classList.remove("flash");void hc.offsetWidth;hc.classList.add("flash");}}
 function renderPR(win){let t=(win?FL().prWin:FL().prLose)||"";return t.replace(/\{name\}/g,P.name||"Your startup").replace(/\{val\}/g,"$"+fmt(valuation())).replace(/\{buzz\}/g,curBuzz().name).replace(/\{months\}/g,P.month);}
-const THEMES=[{id:"default",name:"Default",cred:0,vars:{}},{id:"yc",name:"YC beige",cred:1,vars:{"--accent":"#caa46a","--accent2":"#d8b886","--mag":"#b98a3e"}},{id:"neon",name:"Crypto neon",cred:3,vars:{"--accent":"#39f5c8","--accent2":"#7a5cff","--mag":"#ff3ea5"}},{id:"noir",name:"Theranos noir",cred:6,vars:{"--accent":"#e24b4a","--accent2":"#c08a8a","--mag":"#8a2020"}},{id:"rams",name:"Dieter Rams",cred:10,vars:{"--accent":"#e8731c","--accent2":"#9aa0a6","--mag":"#cf5f17"}}];
+// Teemad muudavad BRUTALIST-paleti muutujaid (--ylw/--mg/--rd/--grn) — telefonimäng kasutab neid,
+// mitte vanu Studio --accent värve (bug: skinid "ei teinud midagi", Siim 11.06).
+const THEMES=[{id:"default",name:"Default",cred:0,vars:{}},{id:"yc",name:"YC beige",cred:1,vars:{"--ylw":"#eed9a6","--mg":"#b9803c","--grn":"#7a8a4a"}},{id:"neon",name:"Crypto neon",cred:3,vars:{"--ylw":"#3ef5c9","--mg":"#7a5cff","--rd":"#ff3ea5"}},{id:"noir",name:"Theranos noir",cred:6,vars:{"--ylw":"#cfcfcf","--mg":"#8a2020","--grn":"#3f5d52"}},{id:"rams",name:"Dieter Rams",cred:10,vars:{"--ylw":"#f07f1f","--mg":"#5f6b72","--rd":"#cf3a12"}}];
 let curTheme="default";
-function applyTheme(id){const t=THEMES.find(x=>x.id===id)||THEMES[0];curTheme=id;const root=document.getElementById("v_preview");if(!root)return;["--accent","--accent2","--mag"].forEach(v=>root.style.removeProperty(v));Object.keys(t.vars).forEach(k=>root.style.setProperty(k,t.vars[k]));}
+function applyTheme(id){const t=THEMES.find(x=>x.id===id)||THEMES[0];curTheme=id;const root=document.getElementById("v_preview");if(!root)return;["--ylw","--mg","--rd","--grn","--paper","--accent","--accent2","--mag"].forEach(v=>root.style.removeProperty(v));Object.keys(t.vars).forEach(k=>root.style.setProperty(k,t.vars[k]));}
 
 //=================== FOUNDER ARCHETYPES (Founder Cred unlocks) ===================
 const ARCHETYPES=[
@@ -1237,7 +1239,7 @@ function renderPreviewShell(){
   #v_preview .pv-r{display:flex;align-items:center;gap:8px}
   #v_preview .pv-bw{justify-content:space-between}
   #v_preview .pv-co{font-weight:800;font-size:18px;letter-spacing:-.3px;color:#111}
-  #v_preview .pv-rebrand{font-size:24px;line-height:1;font-weight:800;border:2px solid var(--bk);min-width:40px;height:38px;padding:0 8px;background:var(--ylw);color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  #v_preview .pv-rebrand{font-size:26px;line-height:1;font-weight:800;border:2px solid var(--bk);min-width:46px;height:44px;padding:0;background:var(--ylw);color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   #v_preview .pv-restart{font-size:11px;font-weight:800;border:2px solid var(--bk);padding:8px 11px;background:#fff;color:#111;text-transform:uppercase;cursor:pointer}
   #v_preview .pv-revpill{font-family:var(--mono);font-weight:700;font-size:12px;background:var(--rd);color:#fff;border:2px solid var(--bk);padding:2px 7px;white-space:nowrap}
   #v_preview .pv-tag2{font-size:10.5px;color:var(--mut);font-style:italic;margin-top:2px}
@@ -1350,7 +1352,7 @@ function renderPreviewShell(){
       <div class="pv-r pv-bw">
         <div class="pv-r" style="min-width:0">
           <span class="pv-co" id="pv_name"></span>
-          <button class="pv-rebrand" id="pv_reroll">⟳</button>
+          <button class="pv-rebrand" id="pv_reroll">↻</button>
         </div>
         <span class="pv-revpill" id="pv_rev">REVENUE $0</span>
       </div>
@@ -1670,7 +1672,17 @@ function shareCard(win,bought,acq){
   const extra=(P.nemesis&&P.nemesis.won)?("RIVAL "+(P.nemesis.name||"").toUpperCase()+" GOT THERE FIRST"):(((P.paperTrail||0)>=2)?("PAPER TRAIL: "+ptGrade().toUpperCase()):"");
   if(extra){x.fillStyle=bk;x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(extra,cx,1670);}
   x.fillStyle=ylw;x.fillRect(90,1730,W-180,150);
-  x.fillStyle=bk;x.font="800 48px Helvetica,Arial,sans-serif";x.fillText("Raise billions. Build nothing.",cx,1822);
+  // bränd-plokk: äpi-ikoon ($0 ruut) + mängu nimi + slogan (Siim 11.06 — jagataval kaardil peab nimi peal olema)
+  const tName="COFOUNDER",tSlog="Raise billions. Build nothing.";
+  x.font="800 50px Helvetica,Arial,sans-serif";const wName=x.measureText(tName).width;
+  x.font="800 32px Helvetica,Arial,sans-serif";const wSlog=x.measureText(tSlog).width;
+  const ic=108,gap=26,gw=ic+gap+Math.max(wName,wSlog),gx=cx-gw/2,gy=1730+(150-ic)/2;
+  x.strokeStyle=bk;x.lineWidth=8;x.strokeRect(gx+4,gy+4,ic-8,ic-8);
+  x.fillStyle=bk;x.textAlign="center";x.font="800 54px Helvetica,Arial,sans-serif";x.fillText("$0",gx+ic/2,gy+ic/2+19);
+  x.textAlign="left";
+  x.font="800 50px Helvetica,Arial,sans-serif";x.fillText(tName,gx+ic+gap,gy+46);
+  x.font="800 32px Helvetica,Arial,sans-serif";x.fillText(tSlog,gx+ic+gap,gy+94);
+  x.textAlign="center";
   // download
   try{const a=document.createElement("a");a.href=c.toDataURL("image/png");a.download=(P.name||"cofounder").replace(/[^a-z0-9]+/gi,"_")+"_card.png";a.click();
     toast("good","Card saved","Share your $0-revenue empire.");}catch(e){toast("bad","Could not save","Try a screenshot instead.");}
