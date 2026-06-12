@@ -1375,7 +1375,7 @@ function renderPreviewShell(){
       <div class="pv-stats">
         <div class="pv-st"><div class="k">Hype</div><div class="v" id="pv_hype">0</div></div>
         <div class="pv-st"><div class="k">Cash</div><div class="v" id="pv_fund">$0</div></div>
-        <div class="pv-st" id="pv_more" style="cursor:pointer"><div class="k">Details</div><div class="v">ⓘ</div></div>
+        <div class="pv-st" id="pv_more" style="cursor:pointer"><div class="k">Financials</div><div class="v">ⓘ</div></div>
       </div>
       <div class="pv-rww">
         <div class="pv-rwlab"><span>Runway</span><span id="pv_rw"></span></div>
@@ -1386,7 +1386,6 @@ function renderPreviewShell(){
       <span class="pv-mlab" id="pv_month">Month 1 / 12</span>
       <span class="pv-ap" id="pv_ap" style="margin-left:auto"></span>
       ${adv?`<button class="pv-restart" id="pvskins" style="margin-left:6px" title="Skins">🎨</button>`:""}
-      <button class="pv-restart" id="pvfull" style="margin-left:6px" title="Fullscreen">⛶</button>
       <button class="pv-restart" id="pvrestart" style="margin-left:6px" title="New random run">↻</button>
     </div>
     <div class="pv-buzz">
@@ -1414,12 +1413,7 @@ function renderPreviewShell(){
   g("pvrestart").onclick=()=>{if(P&&!P.over&&!confirm("Restart? You'll lose this run."))return;newRun(true);};
   const skEl=g("pvskins");if(skEl)skEl.onclick=()=>openSkinsSheet();
   const moEl=g("pv_more");if(moEl)moEl.onclick=()=>openSheet("stats");
-  const fsEl=g("pvfull");if(fsEl)fsEl.onclick=()=>{ // täisekraan: peidab brauseri/HTML-vieweri UI (Chrome Android)
-    try{
-      if(document.fullscreenElement){document.exitFullscreen();}
-      else{const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el);}
-    }catch(e){toast("bad","Fullscreen unavailable","Open the file in Chrome for fullscreen.");}
-  };
+  // ⛶ fullscreen-nupp eemaldatud (Siim 11.06): iOS Safari ei toeta lehe fullscreen-API-t ja installitud PWA-s pole vaja
   g("pv_next").onclick=()=>{if(P&&!P.over&&P.ap<=0)nextMonth();}; // aktiveerub alles siis, kui AP kulutatud (Siim 11.06)
   g("pv_reroll").onclick=()=>{ // puhas flavor — hype'i EI anna (oli "optimaalne chore": tasuta hype 1×/kuu)
     P.name=genName();P.tagline=pick(FL().taglines);
