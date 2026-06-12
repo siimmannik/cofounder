@@ -657,22 +657,41 @@ function runwayMo(){const b=burnMo();return b>0?P.funding/b:Infinity}
 function valuation(){return P.hype*buzzMult()*(B().valuationFactor||25)*(P.shipMult||1)}
 function stageName(){const v=valuation();const st=[[0,"Garage"],[100000,"Pre-seed"],[1000000,"Seed"],[50000000,"Series A"],[150000000,"Series B"],[400000000,"Series C"],[2000000000,"Scale-up"],[100000000000,"Pre-IPO"]];let n="Garage";st.forEach(x=>{if(v>=x[0])n=x[1]});return n}
 function hqName(){const v=valuation();const t=[[0,"Mom's garage"],[1e6,"A WeWork hot desk"],[1e7,"An office with a neon logo"],[1e8,"Two floors and a barista"],[5e8,"HQ tower (naming rights pending)"],[1e9,"A campus with a sculpture garden"]];let n=t[0][1];t.forEach(x=>{if(v>=x[0])n=x[1]});return n} // puhas flavor: kontor kasvab valuationiga
-// ===== SFX + HAPTICS — väike WebAudio "juice". META.muted lülitab välja (Details-sheetis). =====
+// ===== SFX v2 — pehme süntees (sine/triangle), rohkem hetki. META.muted lülitab välja (Financials-sheetis).
+// NB: iOS Safari EI vibreeri kunagi (API puudub) ja hääletu-režiimis on ka heli vait — Apple'i reegel.
+const SFX_OPT={post:true,month:false}; // sagedased mikro-helid: Siimu lülitada
 let _ac=null;
+function _tone(t0,f,d,o2){
+  const o=_ac.createOscillator(),g=_ac.createGain(),at=(o2&&o2.at)||0,gn=(o2&&o2.gain)||0.07;
+  o.type=(o2&&o2.type)||"sine";o.frequency.setValueAtTime(f,t0+at);
+  if(o2&&o2.slideTo)o.frequency.exponentialRampToValueAtTime(o2.slideTo,t0+at+d);
+  g.gain.setValueAtTime(0.0001,t0+at);
+  g.gain.exponentialRampToValueAtTime(gn,t0+at+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+at+d);
+  o.connect(g);g.connect(_ac.destination);o.start(t0+at);o.stop(t0+at+d+0.03);
+}
 function sfx(kind){
   if(META.muted)return;
   try{
     _ac=_ac||new (window.AudioContext||window.webkitAudioContext)();
-    const t=_ac.currentTime;
-    const tone=(f,d,at,type)=>{const o=_ac.createOscillator(),g=_ac.createGain();o.type=type||"square";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+at);g.gain.exponentialRampToValueAtTime(0.1,t+at+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+at+d);o.connect(g);g.connect(_ac.destination);o.start(t+at);o.stop(t+at+d+0.02);};
-    if(kind==="raise"){tone(880,0.09,0);tone(1320,0.16,0.08);}
-    else if(kind==="bad"){tone(150,0.22,0,"sawtooth");}
-    else if(kind==="pivot"){tone(440,0.07,0);tone(660,0.07,0.06);tone(990,0.1,0.12);}
-    else if(kind==="sale"){tone(1047,0.09,0);tone(1568,0.18,0.08);}
-    else if(kind==="win"){[523,659,784,1047].forEach((f,i)=>tone(f,0.15,i*0.11));}
-    else if(kind==="lose"){[392,330,262].forEach((f,i)=>tone(f,0.18,i*0.14,"triangle"));}
+    if(_ac.state==="suspended")_ac.resume();
+    const t=_ac.currentTime,T=(f,d,o)=>_tone(t,f,d,o);
+    if(kind==="raise"){T(784,0.10);T(1175,0.10,{at:0.07});T(1568,0.22,{at:0.14,gain:0.06});} // cha-ching kvindiga
+    else if(kind==="sale"){T(1047,0.09);T(1568,0.20,{at:0.08});T(2093,0.18,{at:0.16,gain:0.05});}
+    else if(kind==="pivot"){T(330,0.28,{slideTo:990,type:"triangle",gain:0.08});} // tõusev sweep
+    else if(kind==="bad"){T(220,0.16,{type:"triangle"});T(185,0.28,{at:0.10,type:"triangle",gain:0.08});}
+    else if(kind==="boss"){T(98,0.5,{type:"sawtooth",gain:0.05});T(104,0.5,{type:"sawtooth",gain:0.05});T(196,0.18,{at:0.5,type:"triangle",gain:0.07});} // madal sting
+    else if(kind==="dm"){T(880,0.07,{gain:0.06});T(1320,0.12,{at:0.09,gain:0.06});} // sõnumi-ping
+    else if(kind==="ding"){T(1568,0.30,{gain:0.06});}
+    else if(kind==="level"){T(523,0.10);T(659,0.10,{at:0.09});T(784,0.20,{at:0.18});}
+    else if(kind==="downround"){T(160,0.16,{type:"square",gain:0.05});T(160,0.16,{at:0.24,type:"square",gain:0.05});}
+    else if(kind==="nemesis"){T(440,0.5,{slideTo:160,type:"triangle",gain:0.07});}
+    else if(kind==="win"){[523,659,784,1047].forEach((f,i)=>T(f,0.14,{at:i*0.10}));T(1319,0.4,{at:0.42,gain:0.06});}
+    else if(kind==="lose"){[392,330,262].forEach((f,i)=>T(f,0.22,{at:i*0.16,type:"triangle"}));}
+    else if(kind==="post"){if(SFX_OPT.post)T(660,0.045,{gain:0.035});}
+    else if(kind==="month"){if(SFX_OPT.month)T(130,0.08,{type:"triangle",gain:0.05});}
   }catch(e){}
-  try{if(navigator.vibrate){const v={raise:30,bad:[60,40,60],pivot:20,sale:[30,30,30],win:[40,40,40,40,120],lose:120}[kind];if(v)navigator.vibrate(v);}}catch(e){}
+  try{if(navigator.vibrate){const v={raise:30,sale:[30,30,30],pivot:20,bad:[60,40,60],boss:[120,60,120],dm:[20,40,20],ding:25,level:[30,30,60],downround:[80,60,80],nemesis:150,win:[40,40,40,40,160],lose:160,post:8}[kind];if(v)navigator.vibrate(v);}}catch(e){}
 }
 const ROUNDS=["Pre-seed","Seed","Series A","Series B","Series C","Series D","Series E","Mega-round"];
 function roundName(){return ROUNDS[Math.min(P.round||0,ROUNDS.length-1)]}
@@ -727,7 +746,7 @@ function pickArchetype(){
   const unlocked=ARCHETYPES.filter(a=>(META.founderCred||0)>=a.cred);
   if(unlocked.length<=1){applyArchetype(ARCHETYPES[0]);return;}
   const locked=ARCHETYPES.filter(a=>(META.founderCred||0)<a.cred);
-  bossModal({header:"👤 New run",title:"Choose your founder",
+  bossModal({sfx:null,header:"👤 New run",title:"Choose your founder",
     body:"Who are you this time?"+(locked.length?(" Locked: "+locked.map(a=>a.name+" ("+a.cred+" cred)").join(", ")+"."):""),
     options:unlocked.map(a=>({label:a.name+" — "+a.fx,resolve:()=>applyArchetype(a)}))});
 }
@@ -842,6 +861,7 @@ function doPost(post){
   const h=(B().clickHype||1500)*(post.hype||1)*buzzMult()*credMult()*(P.pivotHypeMod||1)*(P.archPostMod||1);
   P.hype+=h;P.totalHype+=h;reanchorMomentum();
   if(h>(P.bestPostH||0)){P.bestPostH=h;P.bestPost=text;}
+  sfx("post");
   popText("+"+fmt(h)+" Hype","var(--accent2)");
   const rep=rng()<0.5?pick(FL().replies||[]):"";
   feedPush({text:text,sub:rep||null,h:h,label:"post"});
@@ -937,6 +957,7 @@ function nextMonth(){
   if(P.over){pvRender();return;}
   if(P.month>=(B().totalMonths||10)){endRun("lose");pvRender();return;}
   P.month++;P.ap=(B().apPerMonth||3)+(P.apBonus||0);P.pvThisMo=0;P.postsThisMo=0;P.sincePivot=(P.sincePivot==null?99:P.sincePivot)+1;
+  sfx("month");
   const hl=pick(FL().headlines);if(hl&&rng()<0.5)feedPush({text:"📰 "+hl.replace(/\{buzz\}/g,curBuzz().name),h:0,trust:0,label:"This month in tech"}); // 50% kuudest — timeline puhtam
   if(P.nemesis){ // rivaal kasvab omasoodu — umbes pooltes runides jõuab $1B-ni enne kuud 10
     P.nemesis.val*=(1.7+rng()*0.8);
@@ -944,7 +965,7 @@ function nextMonth(){
       P.nemesis.won=true;
       feedPush({text:"🦄 "+P.nemesis.name+" just hit a $1B valuation — before you. Their founder posted a thread thanking 'the haters'.",h:0,label:"rival"});
       toast("bad","Your rival is a unicorn",P.nemesis.name+" got there first.");
-      sfx("bad");
+      sfx("nemesis");
     } else if(!P.nemesis.won&&rng()<0.5){
       const ln=pick(NEMESIS_LINES);
       feedPush({text:ln.replace(/\{name\}/g,P.nemesis.name).replace(/\{val\}/g,"$"+fmt(P.nemesis.val)),h:0,label:"rival"});
@@ -1022,6 +1043,7 @@ function downRound(){
   const bridge=burnMo()*6+5000;
   P.funding=bridge;
   P.ownership=(P.ownership||100)*0.95; // down-round lahjendab founderit −5% (Siim 12.06)
+  sfx("downround");
   feedPush({text:"DOWN-ROUND — you ran out of cash. Emergency money came in at a 'revised' valuation: hype −"+Math.round(loss*100)+"%, your stake −5%, $"+fmt(bridge)+" wired in. Flat is the new up.",h:0,label:"crisis"});
   toast("bad","Down-round","Hype −"+Math.round(loss*100)+"% · your stake −5% · emergency cash in.");
 }
@@ -1041,13 +1063,14 @@ function checkWin(){
 }
 function millionaireMilestone(){
   P.milestoneM=true;
+  sfx("ding");
   const ln=pick(FL().millionaire);if(ln)feedPush({text:"🎉 "+ln,h:0,label:"milestone"});
   toast("good","Millionaire (lol)","$1M valuation. Revenue: still $0.");
 }
 function levelUp(){
   P.leveledUp=true;
   const ln=pick(FL().levelUp);if(ln)feedPush({text:"🏆 "+ln,h:0,label:"perk unlocked"});
-  bossModal({header:"📈 Milestone",title:"LEVEL UP — you crossed $100M",body:"You're officially 'a real company' now (allegedly). Pick a permanent perk for the rest of the run:",options:[
+  bossModal({sfx:"level",header:"📈 Milestone",title:"LEVEL UP — you crossed $100M",body:"You're officially 'a real company' now (allegedly). Pick a permanent perk for the rest of the run:",options:[
     {label:"+1 action point every month",resolve:()=>{P.apBonus=(P.apBonus||0)+1;P.ap=(P.ap||0)+1;toast("good","+1 AP","More leadership to show.");}},
     {label:"+25% to hype & valuation (hotter narrative)",resolve:()=>{P.buzzBonus=(P.buzzBonus||1)*1.25;toast("good","Hotter narrative","+25% multiplier.");}},
     {label:"Halve your monthly burn (efficiency)",resolve:()=>{P.burnMult=(P.burnMult||1)*0.5;toast("good","Leaner","Burn cut in half.");}}
@@ -1069,7 +1092,7 @@ function pocketMoney(){ // PÄRIS raha founderi taskus — paberi-valuation EI O
 function paperStake(){return (P.ownership||100)/100*valuation();}
 // ===== EXIT CHOICE — $1B hetkel valid, mis legendiks sa saad. Kõik kolm on võidud, epiloog erineb. =====
 function exitChoice(){
-  bossModal({header:"🦄 $1,000,000,000",title:"You're a unicorn. Pick your exit",
+  bossModal({sfx:"level",header:"🦄 $1,000,000,000",title:"You're a unicorn. Pick your exit",
     body:"The valuation is real (it isn't). The money is real (it's paper). Time to decide what kind of legend you become.",
     options:[
       {label:"IPO — ring the bell",resolve:()=>{P.exitType="ipo";P.epilogue="COFND opened at $42, 'priced for perfection'. It now trades at $17. You are still unfathomably rich. Retail is not.";endRun("win");}},
@@ -1094,6 +1117,7 @@ function endRun(result){
 }
 function offerBuyout(){
   const amt=valuation();
+  sfx("dm");
   modal("An acquirer wants to buy you","Now that you have real revenue, a buyer showed up. They'll acquire you for $"+fmt(amt)+" — a guaranteed exit. Or hold out for the $1B unicorn.","Hold out for unicorn","Take the buyout",
     ()=>{P.hype*=1.1;feedPush({text:"Turned down an acquisition offer. 'We're just getting started.'",h:0,label:"buyout"});toast("good","Held out","Bullish signal. +10% hype.");pvRender();},
     ()=>{
@@ -1110,6 +1134,7 @@ function bossModal(boss){
   if(!body){legacyBossModal(boss);return;} // safety: shell not mounted
   pvBoss=boss;pvSheet=boss.optional?"offer":"boss"; // "offer" = dismissable (hire DMs etc), "boss" = mandatory
   if(xb)xb.style.display=boss.optional?"":"none";
+  const sk=("sfx" in boss)?boss.sfx:(boss.optional?"dm":"boss");if(sk)sfx(sk); // sting bossile, ping DM-ile; boss.sfx üle-kirjutab (null = vaikne)
   ttl.textContent=boss.title||"Decision";
   let h="";
   if(boss.header)h+=`<div class="pv-bosskind">${(boss.header||"").replace(/</g,'&lt;')}</div>`;
