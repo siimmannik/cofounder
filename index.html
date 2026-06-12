@@ -994,10 +994,13 @@ function maybeHireOffer(){
     ]});
 }
 function monthlyEvent(){
-  // hire-conditional events only fire if you own the relevant hire (needHire = upgrade id)
-  const pool=S.events.filter(e=>!e.needHire||(P.owned[e.needHire]||0)>0);
+  // hire-conditional events only fire if you own the relevant hire (needHire = upgrade id).
+  // Iga event max 1× runi jooksul (Siim 12.06: "Steven Bartlett ei tohi kaks korda mainida").
+  P.usedEvents=P.usedEvents||[];
+  const pool=S.events.filter(e=>(!e.needHire||(P.owned[e.needHire]||0)>0)&&P.usedEvents.indexOf(e.id)<0);
   if(!pool.length)return;
   const e=pool[Math.floor(rng()*pool.length)];
+  P.usedEvents.push(e.id);
   if(e.type==="choice"&&e.choice){
     const cash=e.choice.a.cash||50000;
     modal(e.title,e.body,e.choice.b.label,e.choice.a.label,
@@ -1014,10 +1017,13 @@ function monthlyEvent(){
   // toasti EI tee — sama info on juba feedi-kaardina (topelt-popup segas mängimist, Siimu flag 11.06)
 }
 function downRound(){
-  P.hype*=(1-(B().downRoundLoss||0.4));P.totalHype*=(1-(B().downRoundLoss||0.4));
-  P.funding=burnMo()*6+5000;
-  feedPush({text:"DOWN-ROUND — flat is the new up.",h:0,label:"crisis"});
-  toast("bad","Down-round","Ran out of funding. Lost "+Math.round((B().downRoundLoss||0.4)*100)+"%.");
+  const loss=(B().downRoundLoss||0.4);
+  P.hype*=(1-loss);P.totalHype*=(1-loss);
+  const bridge=burnMo()*6+5000;
+  P.funding=bridge;
+  P.ownership=(P.ownership||100)*0.95; // down-round lahjendab founderit −5% (Siim 12.06)
+  feedPush({text:"DOWN-ROUND — you ran out of cash. Emergency money came in at a 'revised' valuation: hype −"+Math.round(loss*100)+"%, your stake −5%, $"+fmt(bridge)+" wired in. Flat is the new up.",h:0,label:"crisis"});
+  toast("bad","Down-round","Hype −"+Math.round(loss*100)+"% · your stake −5% · emergency cash in.");
 }
 function checkWin(){
   if(!P||P.over)return;
