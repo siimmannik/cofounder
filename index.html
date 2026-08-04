@@ -144,6 +144,14 @@
 <div id="bossmodal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:55"><div class="mbox" style="max-width:460px"><div id="bmkind" style="font-size:11px;color:var(--mag);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">⚠ Boss event</div><h3 id="bmt"></h3><p id="bmb"></p><div id="bmopts" style="display:flex;flex-direction:column;gap:8px"></div></div></div>
 
 <script>
+// Kas mäng jookseb Androidi äpi (TWA) või paigaldatud PWA sees? Siis EI näidata Play Store'i linki.
+// TWA-s on document.referrer "android-app://alt_text.cofounder.game".
+const IN_APP = (typeof document!=="undefined" && document.referrer.startsWith("android-app://"))
+  || (typeof matchMedia==="function" && matchMedia("(display-mode: standalone)").matches)
+  || navigator.standalone === true;
+const PLAY_URL = "https://play.google.com/store/apps/details?id=alt_text.cofounder.game";
+const GAME_URL = "siimmannik.github.io/cofounder";
+const CONTACT  = "cofounder@alltekst.ee";
 //=================== SEED ===================
 const SEED = {
   meta:{version:"1.1"},
@@ -1635,7 +1643,8 @@ function pvRender(){
   if(feed)feed.innerHTML=feedHTMLWithAds(P.feed||[])||`<div class="pv-empty">Take an action — it shows up here.</div>`;
   const sk=g("pv_skins");
   if(sk){
-    sk.innerHTML="<span>Skins (Founder Cred: "+(P.founderCred||0)+"):</span> "+THEMES.map(t=>{const un=(P.founderCred||0)>=t.cred;return `<button class="skinbtn ${curTheme===t.id?'on':''} ${un?'':'lock'}" data-skin="${t.id}" ${un?'':'disabled'}>${un?'':'🔒 '}${t.name}${t.cred>0?' ('+t.cred+')':''}</button>`}).join(" ");
+    sk.innerHTML="<span>Skins (Founder Cred: "+(P.founderCred||0)+"):</span> "+THEMES.map(t=>{const un=(P.founderCred||0)>=t.cred;return `<button class="skinbtn ${curTheme===t.id?'on':''} ${un?'':'lock'}" data-skin="${t.id}" ${un?'':'disabled'}>${un?'':'🔒 '}${t.name}${t.cred>0?' ('+t.cred+')':''}</button>`}).join(" ")
+      + (IN_APP?"":` <a class="skinbtn" href="${PLAY_URL}&amp;referrer=utm_source%3Dweb%26utm_medium%3Dtopbar" target="_blank" rel="noopener" style="text-decoration:none;margin-left:10px">▶ Also on Google Play</a>`);
     sk.querySelectorAll("[data-skin]").forEach(b=>b.onclick=()=>{if(!b.disabled){applyTheme(b.dataset.skin);pvRender();}});
   }
   const nbtn=g("pv_next");
@@ -1682,7 +1691,8 @@ function pvRender(){
       ${credLine?`<div style="text-align:center;font-size:10.5px;font-weight:700;color:#111;margin:8px 14px 0">${credLine}</div>`:''}
       ${(()=>{const epi=[P.epilogue,ptEpilogue(win)].filter(Boolean).join(" ");return epi?`<div style="border:2px solid var(--bk);background:#fff7da;padding:8px 10px;margin:8px 14px 0;font-size:11px;line-height:1.45;font-style:italic;color:#111">${epi.replace(/</g,'&lt;')}</div>`:'';})()}
       <div style="display:flex;gap:8px;margin:10px 14px 0"><button style="flex:1;border:2px solid var(--bk);background:var(--ylw);color:#111;font-weight:800;text-transform:uppercase;font-size:11px;padding:9px;cursor:pointer" id="pv_share">📸 Save card</button><button style="flex:1;border:2px solid var(--bk);background:var(--bk);color:#fff;font-weight:800;text-transform:uppercase;font-size:11px;padding:9px;cursor:pointer" onclick="newRun(false)">${win?'Go again →':'Try again →'}</button></div>
-      <div style="text-align:center;margin:7px 14px 9px"><a href="mailto:siim.mannik@gmail.com?subject=COFOUNDER%20feedback" style="font-size:10px;font-weight:700;color:#6b6760;text-decoration:underline">Found a bug? Have notes? Feedback →</a></div>
+      ${IN_APP?'':`<div style="margin:9px 14px 0"><a href="${PLAY_URL}&amp;referrer=utm_source%3Dweb%26utm_medium%3Dendcard" target="_blank" rel="noopener" style="display:block;border:2px solid var(--bk);background:#fff;color:#111;text-align:center;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;text-decoration:none;padding:8px">▶ Also on Google Play</a></div>`}
+      <div style="text-align:center;margin:7px 14px 9px"><a href="mailto:${CONTACT}?subject=COFOUNDER%20feedback" style="font-size:10px;font-weight:700;color:#6b6760;text-decoration:underline">Found a bug? Have notes? Feedback →</a></div>
       <div style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--ylw);border-top:3px solid var(--bk);padding:9px"><div style="width:38px;height:38px;border:3px solid var(--bk);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--mono);font-size:15px;color:#111;flex-shrink:0">$0</div><div><div style="font-weight:800;font-size:15px;letter-spacing:.5px;color:#111">COFOUNDER</div><div style="font-size:9.5px;font-weight:700;color:#111">Raise billions. Build nothing.</div></div></div>
     </div>`;
     const sh=g("pv_share");if(sh)sh.onclick=()=>shareCard(win,bought,acq);
@@ -1723,17 +1733,20 @@ function shareCard(win,bought,acq){
     const ds="Last shipped: "+(pick(P.usedShips)||"").replace(/[.\s]+$/,"");x.fillText(ell(ds,W-180),cx,1600);}
   const extra=(P.nemesis&&P.nemesis.won)?("RIVAL "+(P.nemesis.name||"").toUpperCase()+" GOT THERE FIRST"):(((P.paperTrail||0)>=2)?("PAPER TRAIL: "+ptGrade().toUpperCase()):"");
   if(extra){x.fillStyle=bk;x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(ell(extra,W-180),cx,1670);}
-  x.fillStyle=ylw;x.fillRect(90,1730,W-180,150);
-  // bränd-plokk: äpi-ikoon ($0 ruut) + mängu nimi + slogan (Siim 11.06 — jagataval kaardil peab nimi peal olema)
-  const tName="COFOUNDER",tSlog="Raise billions. Build nothing.";
+  x.fillStyle=ylw;x.fillRect(90,1706,W-180,174);
+  // bränd-plokk: äpi-ikoon ($0 ruut) + mängu nimi + slogan + URL
+  // (03.08.2026 — jagatav kaart peab mängu juurde tagasi viima, muidu ei leia keegi seda üles)
+  const tName="COFOUNDER",tSlog="Raise billions. Build nothing.",tUrl=GAME_URL;
   x.font="800 50px Helvetica,Arial,sans-serif";const wName=x.measureText(tName).width;
   x.font="800 32px Helvetica,Arial,sans-serif";const wSlog=x.measureText(tSlog).width;
-  const ic=108,gap=26,gw=ic+gap+Math.max(wName,wSlog),gx=cx-gw/2,gy=1730+(150-ic)/2;
+  x.font="800 28px Helvetica,Arial,sans-serif";const wUrl=x.measureText(tUrl).width;
+  const ic=108,gap=26,gw=ic+gap+Math.max(wName,wSlog,wUrl),gx=cx-gw/2,gy=1706+(174-ic)/2;
   x.strokeStyle=bk;x.lineWidth=8;x.strokeRect(gx+4,gy+4,ic-8,ic-8);
   x.fillStyle=bk;x.textAlign="center";x.font="800 54px Helvetica,Arial,sans-serif";x.fillText("$0",gx+ic/2,gy+ic/2+19);
   x.textAlign="left";
-  x.font="800 50px Helvetica,Arial,sans-serif";x.fillText(tName,gx+ic+gap,gy+46);
-  x.font="800 32px Helvetica,Arial,sans-serif";x.fillText(tSlog,gx+ic+gap,gy+94);
+  x.font="800 50px Helvetica,Arial,sans-serif";x.fillText(tName,gx+ic+gap,gy+40);
+  x.font="800 32px Helvetica,Arial,sans-serif";x.fillText(tSlog,gx+ic+gap,gy+82);
+  x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(tUrl,gx+ic+gap,gy+124);
   x.textAlign="center";
   // download
   try{const a=document.createElement("a");a.href=c.toDataURL("image/png");a.download=(P.name||"cofounder").replace(/[^a-z0-9]+/gi,"_")+"_card.png";a.click();
