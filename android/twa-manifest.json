@@ -1,6 +1,6 @@
 {
   "packageId": "alt_text.cofounder.game",
-  "host": "siimmannik.github.io",
+  "host": "cofoundergame.com",
   "name": "COFOUNDER — the real AI-ntrepreneur game",
   "launcherName": "COFOUNDER",
   "display": "standalone",
@@ -12,9 +12,9 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#F4F1E9",
   "enableNotifications": true,
-  "startUrl": "/cofounder/index.html",
-  "iconUrl": "https://siimmannik.github.io/cofounder/icon-512.png",
-  "maskableIconUrl": "https://siimmannik.github.io/cofounder/icon-512.png",
+  "startUrl": "/index.html",
+  "iconUrl": "https://cofoundergame.com/icon-512.png",
+  "maskableIconUrl": "https://cofoundergame.com/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./upload-key.keystore",
@@ -24,7 +24,7 @@
   "appVersionCode": 1,
   "shortcuts": [],
   "generatorApp": "unknown",
-  "webManifestUrl": "https://siimmannik.github.io/cofounder/manifest.json",
+  "webManifestUrl": "https://cofoundergame.com/manifest.json",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://siimmannik.github.io/cofounder/",
+  "fullScopeUrl": "https://cofoundergame.com/",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],
