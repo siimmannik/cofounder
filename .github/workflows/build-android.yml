@@ -1,0 +1,94 @@
+name: Build Android AAB
+
+# Ehitab COFOUNDERi Androidi paki (TWA) uuesti, target API level 36.
+# Käivitub ainult käsitsi: Actions -> Build Android AAB -> Run workflow.
+#
+# Vajalikud repo secretid (Settings -> Secrets and variables -> Actions):
+#   UPLOAD_KEYSTORE_B64       cofounder-upload-key.keystore base64-kujul
+#   UPLOAD_KEYSTORE_PASSWORD  keystore'i parool (sama, mis key parool)
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: "Versiooni nimi (nt 1.1). versionCode kasvab automaatselt."
+        required: true
+        default: "1.1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Võta repo
+        uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Paigalda platform 36 ja build-tools 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Paigalda Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Näita Bubblewrapile JDK ja SDK teed
+        run: bubblewrap updateConfig --jdkPath "$JAVA_HOME" --androidSdkPath "$ANDROID_HOME"
+
+      - name: Taasta allkirjastusvõti secretist
+        env:
+          KS_B64: ${{ secrets.UPLOAD_KEYSTORE_B64 }}
+        run: |
+          mkdir -p build
+          printf '%s' "$KS_B64" | base64 -d > build/upload-key.keystore
+          test -s build/upload-key.keystore || { echo "Keystore on tühi — kontrolli UPLOAD_KEYSTORE_B64 secretit"; exit 1; }
+          echo "Keystore taastatud ($(stat -c%s build/upload-key.keystore) baiti)"
+
+      - name: Kopeeri twa-manifest
+        run: cp android/twa-manifest.json build/twa-manifest.json
+
+      - name: Genereeri Androidi projekt uue templatega
+        working-directory: build
+        run: bubblewrap update --appVersionName=${{ inputs.versionName }}
+
+      - name: Kontrolli SDK versioone enne buildi
+        working-directory: build
+        run: |
+          grep -nE "compileSdkVersion|targetSdkVersion|versionCode|versionName" app/build.gradle
+          grep -q "targetSdkVersion 36" app/build.gradle || { echo "targetSdkVersion EI OLE 36"; exit 1; }
+
+      - name: Ehita ja allkirjasta AAB
+        working-directory: build
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: bubblewrap build --skipPwaValidation
+
+      - name: Kontrolli valminud AAB-i
+        working-directory: build
+        run: |
+          ls -lh app-release-bundle.aab
+          unzip -p app-release-bundle.aab base/manifest/AndroidManifest.xml \
+            | strings | grep -A0 -E "^3[0-9]$" | head -5 || true
+          echo "--- allkiri ---"
+          unzip -l app-release-bundle.aab | grep -E "META-INF/.*(RSA|DSA|EC)" || echo "HOIATUS: allkirja ei leidnud"
+
+      - name: Salvesta AAB artefaktina
+        uses: actions/upload-artifact@v4
+        with:
+          name: cofounder-aab-target36
+          path: build/app-release-bundle.aab
+          retention-days: 30
+
+      - name: Salvesta uuendatud twa-manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: twa-manifest-updated
+          path: build/twa-manifest.json
+          retention-days: 30
