@@ -38,8 +38,15 @@ jobs:
       - name: Paigalda Bubblewrap
         run: npm install -g @bubblewrap/cli
 
+      # NB: `bubblewrap updateConfig` küsib esimesel korral interaktiivselt, kas ta tohib
+      # ise JDK alla laadida, ja jookseb CI-s kokku. Kirjutame config.json otse.
       - name: Näita Bubblewrapile JDK ja SDK teed
-        run: bubblewrap updateConfig --jdkPath "$JAVA_HOME" --androidSdkPath "$ANDROID_HOME"
+        run: |
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
+          cat ~/.bubblewrap/config.json
+          test -x "$JAVA_HOME/bin/java" || { echo "JAVA_HOME vale: $JAVA_HOME"; exit 1; }
+          test -d "$ANDROID_HOME" || { echo "ANDROID_HOME vale: $ANDROID_HOME"; exit 1; }
 
       - name: Taasta allkirjastusvõti secretist
         env:
@@ -55,7 +62,7 @@ jobs:
 
       - name: Genereeri Androidi projekt uue templatega
         working-directory: build
-        run: bubblewrap update --appVersionName=${{ inputs.versionName }}
+        run: bubblewrap update --appVersionName=${{ inputs.versionName }} < /dev/null
 
       - name: Kontrolli SDK versioone enne buildi
         working-directory: build
@@ -68,7 +75,7 @@ jobs:
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
           BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
-        run: bubblewrap build --skipPwaValidation
+        run: bubblewrap build --skipPwaValidation < /dev/null
 
       - name: Kontrolli valminud AAB-i
         working-directory: build
