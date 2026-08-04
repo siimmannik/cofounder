@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "alt_text.cofounder.game",
+    "sha256_cert_fingerprints": [
+      "2A:6B:74:12:84:5B:9F:3D:F6:0A:91:26:0D:87:27:72:82:F4:91:74:EC:26:3C:8F:89:05:41:94:F8:7B:47:A1",
+      "FA:C6:1E:DC:40:75:F6:D9:F1:3E:85:41:D0:DC:69:CD:2A:FA:E7:8B:B2:26:B5:A2:43:4F:21:16:03:87:DD:4A"
+    ]
+  }
+}]
