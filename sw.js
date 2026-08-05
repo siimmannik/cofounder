@@ -1,6 +1,8 @@
 // COFOUNDER service worker — network-first (uuendused jõuavad kohe kohale), offline-fallback cache'ist.
-const C = "cofounder-v1";
-const CORE = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+// v2 (05.08.2026): mäng kolis play.html-i, index.html on nüüd landing page.
+// Cache'i nime muutus kustutab vana v1 cache'i, kus "./index.html" all oli veel mäng.
+const C = "cofounder-v2";
+const CORE = ["./", "./index.html", "./play.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
 });
@@ -14,6 +16,8 @@ self.addEventListener("fetch", e => {
       const cp = r.clone();
       caches.open(C).then(c => c.put(e.request, cp));
       return r;
-    }).catch(() => caches.match(e.request).then(r => r || caches.match("./index.html")))
+    // Offline-fallback: navigeerimispäringud lähevad mängu, mitte landing page'ile —
+    // võrguta kasutaja on peaaegu alati äpi/PWA kasutaja, kes tahab mängida.
+    }).catch(() => caches.match(e.request).then(r => r || caches.match("./play.html")))
   );
 });

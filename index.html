@@ -2,1796 +2,325 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>COFOUNDER — the real AI-ntrepreneur game</title>
-<link rel="manifest" href="manifest.json">
+<meta name="description" content="Raise billions. Build nothing. A satirical startup game: climb the buzzword ladder to a $1B valuation with $0 revenue. Free in your browser and on Google Play.">
 <meta name="theme-color" content="#ffd400">
-<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta property="og:title" content="COFOUNDER — the real AI-ntrepreneur game">
 <meta property="og:description" content="Raise billions. Build nothing. A satirical startup game.">
 <meta property="og:image" content="https://cofoundergame.com/share.png">
 <meta property="og:url" content="https://cofoundergame.com/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<script>if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script>
+
+<script>
+/* Androidi äpp (TWA) ja paigaldatud PWA peavad avanema OTSE mängus, mitte landing page'il.
+   TWA-s on document.referrer "android-app://alt_text.cofounder.game".
+   See jookseb enne renderdust, nii et landingut korrakski ei vilksata.
+   NB: hoiab töökorras ka vanad äpi-installid, mis avavad veel juurt "/". */
+(function () {
+  try {
+    var inApp = document.referrer.indexOf("android-app://") === 0
+      || (typeof matchMedia === "function" && matchMedia("(display-mode: standalone)").matches)
+      || (typeof matchMedia === "function" && matchMedia("(display-mode: fullscreen)").matches)
+      || navigator.standalone === true;
+    if (inApp) location.replace("play.html" + location.search + location.hash);
+  } catch (e) {}
+})();
+</script>
+
 <style>
   :root{
-    --bg:#0c1016;--panel:#141b25;--panel2:#1b2430;--line:#27323f;--txt:#dde5ee;
-    --dim:#8593a4;--accent:#39d98a;--accent2:#5cc8ff;--warn:#ffb454;--bad:#ff6b6b;
-    --gold:#ffd166;--mag:#D4537E;
+    --paper:#f4f1e9; --bk:#111; --ylw:#ffd400; --rd:#e5342a; --grn:#1f9d55;
+    --mg:#c026a8; --mut:#6b6760;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14px}
-  header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#090d12;
-    border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;flex-wrap:wrap}
-  header h1{font-size:15px;margin:0;font-weight:600}
-  header h1 b{color:var(--accent)}
-  .sp{flex:1}
-  button{font-family:var(--sans);font-size:13px;padding:7px 12px;border-radius:7px;cursor:pointer;
-    border:1px solid var(--line);background:var(--panel2);color:var(--txt);transition:.1s}
-  button:hover{border-color:var(--accent2)}
-  button.pri{border-color:var(--accent);color:var(--accent)}
-  button.danger{border-color:var(--bad);color:var(--bad)}
-  .tabs{display:flex;gap:4px;padding:8px 16px;background:#0a0e14;border-bottom:1px solid var(--line);
-    position:sticky;top:49px;z-index:19;flex-wrap:wrap}
-  .tab{padding:7px 13px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--dim);border:1px solid transparent}
-  .tab.on{background:var(--panel2);color:var(--accent);border-color:var(--line)}
-  main{max-width:1100px;margin:0 auto;padding:18px}
-  .view{display:none}.view.on{display:block}
-  .hint{color:var(--dim);font-size:12px;margin:0 0 14px;line-height:1.5}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-  .f{display:flex;flex-direction:column;gap:3px}
-  .f label{font-size:11px;color:var(--dim)}
-  input,select,textarea{font-family:var(--sans);font-size:13px;background:var(--panel2);
-    border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:7px 9px}
-  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent2)}
-  input.num{width:90px;font-family:var(--mono)}
-  input.wide{min-width:240px}
-  textarea{min-width:280px;min-height:38px;resize:vertical}
-  .del{margin-left:auto}
-  .add{margin-top:6px}
-  .cat{font-size:11px;color:var(--mag);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px}
-  #pv{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:760px){#pv{grid-template-columns:1fr}}
-  #pv_top{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;align-items:start}
-  @media(max-width:760px){#pv_top{grid-template-columns:1fr}}
-  .pvcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-  .stat{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid var(--line)}
-  .stat b{font-family:var(--mono)}
-  .big{font-size:30px;font-family:var(--mono);font-weight:600}
-  .rev{color:var(--dim);font-size:12px}
-  .bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
-  .bar > div{height:100%}
-  .shop{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
-  .buy{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);
-    border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px}
-  .buy:hover{border-color:var(--accent)}
-  .buy.no{opacity:.45;cursor:not-allowed}
-  .angle{flex:1;min-width:120px;font-size:12px;padding:9px;text-align:left}
-  #toasts{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:7px;z-index:40;max-width:300px}
-  .toast{background:var(--panel2);border:1px solid var(--accent2);border-left:4px solid var(--accent2);
-    border-radius:7px;padding:9px 11px;font-size:12px;line-height:1.4}
-  .toast.bad{border-color:var(--bad);border-left-color:var(--bad)}
-  .toast.good{border-color:var(--accent);border-left-color:var(--accent)}
-  #modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50}
-  .mbox{background:var(--panel);border:1px solid var(--accent2);border-radius:11px;padding:20px;max-width:380px;width:90%}
-  .mbox h3{margin:0 0 8px;color:var(--accent2);font-size:15px}
-  .mbox p{font-size:13px;color:var(--txt);line-height:1.5;margin:0 0 16px}
-  textarea.json{width:100%;min-height:320px;font-family:var(--mono);font-size:12px;white-space:pre}
-  small.k{font-family:var(--mono);color:var(--dim)}
-  @keyframes popup{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-44px)}}
-  @keyframes flashpulse{0%{box-shadow:0 0 0 0 rgba(212,83,126,0)}45%{box-shadow:0 0 34px 7px rgba(212,83,126,.85)}100%{box-shadow:0 0 0 0 rgba(212,83,126,0)}}
-  .flash{animation:flashpulse .55s ease-out}
-  .skinbtn{font-size:12px;padding:6px 11px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer}
-  .skinbtn.on{border-color:var(--accent);color:var(--accent)}
-  .skinbtn.lock{opacity:.45;cursor:not-allowed}
-  .apsec{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:var(--panel2)}
-  .aphd{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:14px}
-  .apbadge{font-size:10px;background:var(--bg);border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:2px 8px;font-family:var(--mono)}
-  /* ===== PHONE SKIN — only on narrow screens. Desktop keeps the full Studio editor. ===== */
-  @media (max-width:760px){
-    html,body{overscroll-behavior:none;background:#f4f1e9}
-    header,.tabs{display:none!important}
-    main{max-width:none;padding:0;margin:0}
-    #v_preview .pvskins{display:none!important}
-    #v_preview .pvwrap{padding:0!important}
-    #v_preview .pvph{width:100%!important;max-width:100%!important;height:100vh!important;height:100dvh!important;border:none!important;box-shadow:none!important;
-      /* hoia mäng telefoni status-bari alt väljas — safe-area katab notchi, lisapolster pole vaja
-         (vana +44px oli Androidi HTML-vieweri jaoks; veebis/PWA-s raiskas iPhone'il ~60px) */
-      padding-top:max(env(safe-area-inset-top,12px),12px);
-      padding-bottom:calc(env(safe-area-inset-bottom,0px) + 3px);
-      padding-left:max(env(safe-area-inset-left,0px),7px);
-      padding-right:max(env(safe-area-inset-right,0px),7px)}
-    #v_preview .pv-hero{border-top:3px solid #111}
-    #v_preview .pv-thumb{border-bottom:3px solid #111}
-    /* toastid ÜLES (mitte nuppude/sheetide peale) ja kitsamad — ei sega mängimist */
-    #toasts{bottom:auto;top:calc(env(safe-area-inset-top,12px) + 6px);right:10px;max-width:72%}
-  }
-  /* täisekraanis pole status-bari — võta 44px reserv maha, mäng saab kogu ekraani */
-  html:fullscreen #v_preview .pvph{padding-top:max(env(safe-area-inset-top,0px),8px)!important}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--bk);font-family:var(--sans);
+    font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+  /* ---------- topbar ---------- */
+  .top{border-bottom:3px solid var(--bk);background:var(--paper);position:sticky;top:0;z-index:30}
+  .top .wrap{display:flex;align-items:center;gap:12px;height:62px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;
+    font-size:19px;letter-spacing:-.4px}
+  .logo .mark{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--ylw);
+    border:2px solid var(--bk);padding:3px 6px;line-height:1}
+  .top .sp{flex:1}
+  .top .tagline{font-size:12.5px;color:var(--mut);font-style:italic}
+  @media(max-width:720px){.top .tagline{display:none}}
+
+  /* ---------- buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--sans);font-weight:800;font-size:14px;text-transform:uppercase;
+    letter-spacing:.5px;text-decoration:none;border:3px solid var(--bk);background:#fff;
+    color:var(--bk);padding:13px 20px;cursor:pointer;box-shadow:5px 5px 0 var(--bk);
+    transition:transform .08s ease, box-shadow .08s ease}
+  .btn:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--bk)}
+  .btn:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--bk)}
+  .btn.y{background:var(--ylw)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:52px 0 12px}
+  .heroGrid{display:grid;grid-template-columns:1fr;gap:34px;align-items:start}
+  @media(min-width:980px){.heroGrid{grid-template-columns:1fr 390px;gap:52px}}
+
+  h1.slabRow{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin:0 0 30px;
+    font-size:clamp(32px,6.6vw,56px);line-height:.98;font-weight:900;letter-spacing:-2px}
+  .slab{display:inline-block;background:var(--ylw);border:4px solid var(--bk);
+    box-shadow:9px 9px 0 var(--bk);padding:6px 18px 9px}
+
+  .lede{font-size:clamp(17px,2.4vw,21px);font-style:italic;color:var(--mut);margin:0 0 20px}
+  .body p{margin:0 0 15px;max-width:56ch}
+  .body strong{background:var(--ylw);padding:0 3px}
+
+  .ctas{display:flex;flex-wrap:wrap;gap:14px;margin:26px 0 22px}
+
+  .facts{display:flex;border:3px solid var(--bk);background:#fff;margin:22px 0 0;max-width:520px}
+  .fact{flex:1;padding:9px 12px;border-right:3px solid var(--bk)}
+  .fact:last-child{border-right:0}
+  .fact .k{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
+  .fact .v{font-family:var(--mono);font-weight:700;font-size:17px;margin-top:1px}
+  .fact.rev .v{color:var(--rd)}
+
+  /* ---------- playable phone ---------- */
+  .stage{display:none}
+  @media(min-width:980px){.stage{display:block}}
+  .stageLabel{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.7px;color:var(--mut);margin:0 0 10px}
+  .dot{width:9px;height:9px;border-radius:99px;background:var(--grn);flex-shrink:0;
+    animation:pulse 2s infinite}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(31,157,85,.55)}
+    70%{box-shadow:0 0 0 9px rgba(31,157,85,0)}
+    100%{box-shadow:0 0 0 0 rgba(31,157,85,0)}}
+  @media(prefers-reduced-motion:reduce){.dot{animation:none}}
+  .phone{width:390px;height:768px;border:4px solid var(--bk);background:var(--paper);
+    box-shadow:12px 12px 0 var(--bk);overflow:hidden;position:relative}
+  .phone iframe{width:100%;height:100%;border:0;display:block}
+  .phoneNote{font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center;font-style:italic}
+  .phoneNote a{font-weight:700}
+
+  /* ---------- sections ---------- */
+  section.blk{border-top:3px solid var(--bk);padding:46px 0}
+  h2{font-size:clamp(22px,3.4vw,30px);font-weight:900;letter-spacing:-.9px;margin:0 0 6px}
+  .kicker{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+    color:var(--mg);margin:0 0 8px}
+
+  /* ---------- features ---------- */
+  .feats{display:grid;grid-template-columns:1fr;gap:14px;margin-top:26px}
+  @media(min-width:640px){.feats{grid-template-columns:1fr 1fr}}
+  @media(min-width:980px){.feats{grid-template-columns:1fr 1fr 1fr}}
+  .feat{border:3px solid var(--bk);background:#fff;padding:15px 16px;box-shadow:5px 5px 0 var(--bk)}
+  .feat h3{margin:0 0 5px;font-size:14.5px;font-weight:800;letter-spacing:-.2px}
+  .feat p{margin:0;font-size:14px;color:var(--mut);line-height:1.5}
+  .feat .num{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--ylw);
+    border:2px solid var(--bk);padding:1px 5px;margin-right:7px}
+
+  /* ---------- screenshots ---------- */
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+  @media(min-width:760px){.shots{grid-template-columns:repeat(4,1fr);gap:18px}}
+  .shots img{width:100%;height:auto;display:block;border:3px solid var(--bk);box-shadow:6px 6px 0 var(--bk)}
+
+  /* ---------- quote ---------- */
+  .quote{background:var(--bk);color:var(--paper);padding:44px 0}
+  .quote .wrap{text-align:center}
+  .quote p{margin:0;font-size:clamp(22px,4.4vw,38px);font-weight:900;letter-spacing:-1.2px;line-height:1.15}
+  .quote p em{font-style:normal;color:var(--ylw)}
+  .quote small{display:block;margin-top:14px;font-size:12.5px;letter-spacing:.6px;
+    text-transform:uppercase;font-weight:700;color:#9a958c}
+
+  /* ---------- trust pills ---------- */
+  .trust{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .pill{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+    border:2px solid var(--bk);background:#fff;padding:5px 10px}
+
+  .final{text-align:center}
+  .final .ctas{justify-content:center;margin-bottom:0}
+
+  /* ---------- footer ---------- */
+  footer{border-top:3px solid var(--bk);padding:24px 0 40px;font-size:13px;color:var(--mut)}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+  footer .sp{flex:1}
+  footer a{font-weight:700;color:var(--bk)}
+
+  .skip{position:absolute;left:-9999px}
+  .skip:focus{left:12px;top:12px;background:var(--ylw);border:3px solid var(--bk);
+    padding:8px 12px;z-index:99;font-weight:800}
 </style>
 </head>
 <body>
-<header>
-  <h1>VibeStartup <b>Studio</b></h1>
-  <span class="rev" id="savestate">saved</span>
-  <div class="sp"></div>
-  <button id="exp" class="pri">⬇ Export JSON</button>
-  <button id="imp">⬆ Import</button>
-  <button id="reseed" class="danger">Reset to seed</button>
-</header>
 
-<div class="tabs" id="tabs"></div>
+<a class="skip" href="play.html">Skip to the game</a>
 
-<main>
-  <div class="view" id="v_upgrades"></div>
-  <div class="view" id="v_buzzwords"></div>
-  <div class="view" id="v_events"></div>
-  <div class="view" id="v_angles"></div>
-  <div class="view" id="v_flavor"></div>
-  <div class="view" id="v_balance"></div>
-  <div class="view" id="v_preview"></div>
-  <div class="view" id="v_json"></div>
-</main>
+<div class="top">
+  <div class="wrap">
+    <a class="logo" href="./"><span class="mark">$0</span> COFOUNDER</a>
+    <span class="sp"></span>
+    <span class="tagline">the real AI-ntrepreneur game</span>
+  </div>
+</div>
 
-<div id="toasts"></div>
-<div id="modal"><div class="mbox"><h3 id="mt"></h3><p id="mb"></p>
-  <div style="display:flex;gap:8px"><button id="mno" style="flex:1"></button><button id="myes" class="pri" style="flex:1"></button></div></div></div>
-<div id="bossmodal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:55"><div class="mbox" style="max-width:460px"><div id="bmkind" style="font-size:11px;color:var(--mag);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">⚠ Boss event</div><h3 id="bmt"></h3><p id="bmb"></p><div id="bmopts" style="display:flex;flex-direction:column;gap:8px"></div></div></div>
+<div class="hero">
+  <div class="wrap heroGrid">
+
+    <div class="body">
+      <h1 class="slabRow">
+        <span class="slab">RAISE BILLIONS.</span>
+        <span class="slab">BUILD NOTHING.</span>
+      </h1>
+
+      <p class="lede">You are a founder. You have a hoodie, a vision, and $1,000.</p>
+
+      <p>Climb the buzzword ladder — Big Data, AI, AGI, whatever's hot this quarter — and
+      ride the hype to a <strong>$1,000,000,000 valuation</strong> in twelve months. Post hot
+      takes. Raise round after round. Pivot at exactly the right moment.</p>
+
+      <p>Maybe even ship something. Carefully, though:
+      <strong>real revenue makes investors nervous.</strong></p>
+
+      <div class="ctas">
+        <a class="btn y" href="play.html">▶ Play free in browser</a>
+        <a class="btn"
+           href="https://play.google.com/store/apps/details?id=alt_text.cofounder.game&amp;referrer=utm_source%3Dweb%26utm_medium%3Dlanding_hero"
+           target="_blank" rel="noopener">Get it on Google Play</a>
+      </div>
+
+      <div class="facts">
+        <div class="fact"><div class="k">Run length</div><div class="v">~5 min</div></div>
+        <div class="fact"><div class="k">Deadline</div><div class="v">12 months</div></div>
+        <div class="fact rev"><div class="k">Revenue</div><div class="v">$0</div></div>
+      </div>
+
+      <div class="trust">
+        <span class="pill">No ads</span>
+        <span class="pill">No accounts</span>
+        <span class="pill">No data collected</span>
+        <span class="pill">Works offline</span>
+      </div>
+    </div>
+
+    <div class="stage">
+      <p class="stageLabel"><span class="dot"></span> Playable right here — no install</p>
+      <div class="phone">
+        <iframe title="COFOUNDER — playable demo" src="play.html"></iframe>
+      </div>
+      <p class="phoneNote">Feeling cramped? <a href="play.html">Open it full screen →</a></p>
+    </div>
+
+  </div>
+</div>
+
+<section class="blk">
+  <div class="wrap">
+    <p class="kicker">What you actually do</p>
+    <h2>Twelve months. Three action points each. No revenue required.</h2>
+
+    <div class="feats">
+      <div class="feat">
+        <h3><span class="num">01</span>Five-minute runs</h3>
+        <p>Turn-based. One more month, one more round. The kind of loop that eats a lunch break.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">02</span>A feed that talks back</h3>
+        <p>Every post, pivot and raise lands in a live timeline. Hot takes can backfire.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">03</span>A rival racing you</h3>
+        <p>Another startup is chasing the same unicorn. Only one of you gets the headline.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">04</span>Survive the grown-ups</h3>
+        <p>Due diligence, a congressional hearing, and a co-founder who wants out.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">05</span>Every lie leaves a paper trail</h3>
+        <p>The epilogue remembers exactly what you claimed back in month three.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">06</span>Choose your exit</h3>
+        <p>IPO, sell to Big Tech, or quietly cash out before anyone checks the numbers.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">07</span>Unlock founder archetypes</h3>
+        <p>The Dropout. The Nepo Baby. The ex-McKinsey partner. Each one plays differently.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="num">08</span>Even the ads are fake</h3>
+        <p>Those banners inside the game are part of the satire. There is no real advertising.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="shotsBlock" hidden>
+  <div class="wrap">
+    <p class="kicker">Screens</p>
+    <h2>It looks like this.</h2>
+    <div class="shots" id="shots">
+      <img src="store-assets/phone-1-1080x1920.png" alt="COFOUNDER — the opening screen" loading="lazy">
+      <img src="store-assets/phone-2-1080x1920.png" alt="COFOUNDER — raising a round" loading="lazy">
+      <img src="store-assets/phone-3-1080x1920.png" alt="COFOUNDER — the live timeline" loading="lazy">
+      <img src="store-assets/phone-4-1080x1920.png" alt="COFOUNDER — the epilogue" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<div class="quote">
+  <div class="wrap">
+    <p>Revenue: <em>$0</em>. Always.<br>That's the point.</p>
+    <small>A satire of the funding climate of our time</small>
+  </div>
+</div>
+
+<section class="blk final">
+  <div class="wrap">
+    <h2>Go raise something.</h2>
+    <div class="ctas">
+      <a class="btn y" href="play.html">▶ Play free in browser</a>
+      <a class="btn"
+         href="https://play.google.com/store/apps/details?id=alt_text.cofounder.game&amp;referrer=utm_source%3Dweb%26utm_medium%3Dlanding_footer"
+         target="_blank" rel="noopener">Get it on Google Play</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Alt-text Games — a trading name of Alltekst OÜ, Estonia</span>
+    <span class="sp"></span>
+    <a href="privacy.html">Privacy</a>
+    <a href="mailto:cofounder@alltekst.ee">cofounder@alltekst.ee</a>
+  </div>
+</footer>
 
 <script>
-// Kas mäng jookseb Androidi äpi (TWA) või paigaldatud PWA sees? Siis EI näidata Play Store'i linki.
-// TWA-s on document.referrer "android-app://alt_text.cofounder.game".
-const IN_APP = (typeof document!=="undefined" && document.referrer.startsWith("android-app://"))
-  || (typeof matchMedia==="function" && matchMedia("(display-mode: standalone)").matches)
-  || navigator.standalone === true;
-const PLAY_URL = "https://play.google.com/store/apps/details?id=alt_text.cofounder.game";
-const GAME_URL = "cofoundergame.com";
-const CONTACT  = "cofounder@alltekst.ee";
-//=================== SEED ===================
-const SEED = {
-  meta:{version:"1.1"},
-  balance:{
-    clickHype:4200, marketRate:0.5, passiveFundingRate:0.15, valuationFactor:25, costGrowth:1.15,
-    pivotTaxPct:0.15, raiseBase:250, raiseGrowth:3.5, raiseRate:7, pivotAP:1, maxPivotPerMonth:1,
-    downRoundLoss:0.4, apPerMonth:3, totalMonths:12, unicornGoal:1000000000, decayPerMonth:22, bossTriggerValuation:50000000,
-    ratioChance:0.25, ratioRiskAbove:1.5, ratioFatiguePct:0.12, saleChance:0.30, saleDecay:0.7, buyoutChance:0.4, millionaireValuation:1000000, levelUpValuation:100000000, hearingValuation:500000000, cofounderValuation:200000000, monthDripSeconds:20, dilutionPerRound:0.12, postHand:2, shipHand:2, overheadBurnPct:0.012, momentumCapPct:0.03, hireBurnMult:12, hireHypeMult:20, hireOfferChance:0.5
-  },
-  upgrades:[
-    {id:"gpt",cat:"tooling",name:"ChatGPT Plus subscription",flavor:"For your LinkedIn prose.",baseCost:15,hype:0.4,burn:0.2,trust:0},
-    {id:"cursor",cat:"tooling",name:"Cursor + Claude setup",flavor:"So you can at least try to build something.",baseCost:110,hype:1.2,burn:0.6,trust:0},
-    {id:"intern",cat:"hiring",name:"Unpaid intern ('for the equity')",flavor:"Prompting ChatGPT for your LinkedIn posts.",baseCost:650,hype:5,burn:3,trust:-2,multi:true},
-    {id:"whisper",cat:"hiring",name:"AI Whisperer (Stanford dropout)",flavor:"Prompting Claude for business model ideas.",baseCost:3400,hype:24,burn:18,trust:0,multi:true},
-    {id:"cvo",cat:"hiring",name:"Chief Vibe Officer",flavor:"HeyGen avatar for employee marketing.",baseCost:14000,hype:80,burn:70,trust:-1},
-    {id:"substack",cat:"marketing",name:"Ghostwritten Substack",flavor:"For imparting the wisdom you source on Threads.",baseCost:78000,hype:380,burn:200,trust:1},
-    {id:"yc",cat:"fundraising",name:"YC acceptance (W26)",flavor:"$500k for 7%. You'd have signed for less.",baseCost:420000,hype:2100,burn:900,trust:3},
-    {id:"wework",cat:"scale",name:"WeWork HQ (no walls)",flavor:"Kombucha on tap. Runway on fire.",baseCost:2200000,hype:11000,burn:14000,trust:0},
-    {id:"michael",cat:"hiring",name:"Michael something.",flavor:"Ex-Anthropic.",baseCost:9500000,hype:48000,burn:55000,trust:2}
-  ],
-  buzzwords:[
-    {id:"bigdata",name:"Big Data",flavor:"Leveraging your private life.",mult:1,band:"plausible"},
-    {id:"ml",name:"Machine Learning",flavor:"Statistics with a marketing budget.",mult:1.6,band:"plausible"},
-    {id:"ai",name:"AI",flavor:"This winter will be different.",mult:2.5,band:"plausible"},
-    {id:"genai",name:"Generative AI",flavor:"Infinite content. Finite ideas.",mult:4,band:"plausible"},
-    {id:"llm",name:"Large Language Models",flavor:"Yes, it was your IP, but think of the Chinese!",mult:6.5,band:"plausible"},
-    {id:"agentic",name:"Agentic AI",flavor:"Like interns, but confident.",mult:10,band:"plausible"},
-    {id:"agents",name:"AI agents",flavor:"Finally we can all be middle managers.",mult:16,band:"plausible"},
-    {id:"agi",name:"AGI",flavor:"Probably here already.",mult:26,band:"plausible"},
-    {id:"physical",name:"Physical AI",flavor:"They can dance! And swarm-kill.",mult:42,band:"stretching"},
-    {id:"asi",name:"Superintelligence",flavor:"If it doesn't kill you... if.",mult:70,band:"stretching"},
-    {id:"quantum",name:"Quantum AI",flavor:"Overhyped and underhyped until observed.",mult:120,band:"absurd"},
-    {id:"tokenmax",name:"Tokenmaxxing",flavor:"Enjoying it while it lasts.",mult:200,band:"absurd"},
-    {id:"valuemax",name:"Valuemaxxing",flavor:"Nobody knows what it is. That's the value.",mult:340,band:"absurd"},
-    {id:"secagents",name:"Secure personal agents",flavor:"Why not use your own computer for a change.",mult:580,band:"absurd"}
-  ],
-  events:[
-    {id:"altman",type:"buff",title:"Sam Altman quote-tweeted you",body:"This is a retirement-level event.",hypeBoost:10},
-    {id:"stripe",type:"debuff",title:"Stripe is holding your funds 'for review'",body:"Needed this like a Cloudflare blackout.",debuffPct:0.2},
-    {id:"elon",type:"buff",title:"Elon tweeted about colonizing the sun.",body:"50% of the stock market panicked up, 50% panicked down.",hypeBoost:6},
-    {id:"bartlett",type:"buff",title:"Steven Bartlett almost mentions you.",body:"Fingers crossed.",hypeBoost:3},
-    {id:"claudelimit",type:"debuff",title:"You hit your Claude weekly limit on Tuesday.",body:"Well that is some welcome work-life balance.",debuffPct:0.1},
-    {id:"tc",type:"instant",title:"TechCrunch mentioned you in a blog post.",body:"Champagne for the whole office. Some left to take home.",instantPct:0.12},
-    {id:"deepseek",type:"debuff",title:"DeepSeek ships something incredible.",body:"What else is new?",debuffPct:0.12},
-    {id:"plugins",type:"debuff",title:"Anthropic announces more Claude plugins",body:"Why do we even bother anymore?",debuffPct:0.1},
-    {id:"ycdm",type:"choice",title:"A YC partner slid into your DMs",body:"Thanks for the flattery, I'm keeping the equity though.",choice:{a:{label:"Take $50k now",cash:50000},b:{label:"Wait for 2× (risky)"}}},
-    {id:"aml",type:"debuff",title:"AML review froze your account",body:"The bank can't explain why a pre-revenue company moves this much money.",debuffPct:0.18},
-    {id:"kyc",type:"debuff",title:"An investor's wire is stuck in KYC",body:"Compliance wants a notarized explanation of what you actually do. Big problem.",debuffPct:0.15},
-    {id:"edd",type:"debuff",title:"Your processor demands 'enhanced due diligence'",body:"Should probably send them some numbers too this time.",debuffPct:0.2},
-    {id:"sanctions",type:"debuff",title:"Sanctions screening flagged your cousin",body:"Your only 'enterprise customer' is now a 'politically exposed person'.",debuffPct:0.16},
-    {id:"waiver",type:"instant",title:"You got a compliance waiver (you know a guy)",body:"Regulatory capture, but make it seed-stage.",instantPct:0.1},
-    {id:"internposts",type:"hype",hypeMult:0.85,needHire:"intern",title:"Your unpaid intern posted from the main account",body:"It was a meme. It was not a good meme. It is now a screenshot in three group chats. Legal says delete it; the internet says too late."},
-    {id:"whisperidea",type:"instant",instantPct:0.25,needHire:"whisper",title:"Your AI Whisperer vibe-coded something that works",body:"Nobody understands it, least of all them. But a customer paid. Actual money changed hands. Briefly."},
-    {id:"cvovibe",type:"buff",hypeBoost:7,needHire:"cvo",title:"Your Chief Vibe Officer set the energy",body:"Zero deliverables, enormous momentum. The offsite clip did numbers. The numbers are engagement, not revenue, but still."},
-    {id:"substackpush",type:"instant",instantPct:0.15,needHire:"substack",title:"Your ghostwritten Substack went semi-viral",body:"A post you didn't write, about a vision you don't have, converted three readers into a wire transfer."},
-    {id:"ycintro",type:"buff",hypeBoost:9,needHire:"yc",title:"A YC partner vouched for you in the group chat",body:"One line: 'these folks are the real deal.' The folks are you. 'Real' is doing a lot of work."},
-    {id:"weworkfire",type:"debuff",debuffPct:0.18,needHire:"wework",title:"The WeWork kombucha tap caught fire",body:"Literally. 'Runway on fire' stopped being a metaphor at 9am. Insurance has questions about the open-plan everything."},
-    {id:"michaelships",type:"buff",hypeBoost:14,needHire:"michael",title:"Michael (ex-Anthropic) actually shipped something",body:"It works. It is unclear how. The board is calling it 'the hire of the decade' and asking, gently, what else he does all day."}
-  ],
-  postAngles:[
-    {id:"hot",label:"Hot take",hype:2.0,posts:[
-      "Unpopular opinion: your {buzz} startup is a CSV and three prompts in a trench coat.",
-      "Hot take: 90% of {buzz} companies are just Notion with extra steps.",
-      "Nobody wants to say it, so I will: most 'AI engineers' have never trained a model. We hire for hunger instead.",
-      "If your moat can be cloned over a weekend, it was never a moat.",
-      "Reminder that 'pre-revenue' is just 'pre-product' wearing a blazer.",
-      "Everyone obsessing over {buzz} will feel silly in 18 months. We'll have pivoted twice by then.",
-      "The real AGI was the funding rounds we raised along the way.",
-      "Your RAG pipeline is Ctrl+F with a $20M valuation.",
-      "Shipping weekly is a vanity metric. Momentum is the deliverable.",
-      "We don't have product-market fit. We have podcast-market fit.",
-      "Founders who 'don't do it for the money' have, without exception, already made the money.",
-      "The best demos are a little broken. Ours isn't.",
-      "Code depreciates. Narrative compounds.",
-      "Headcount is the new traction.",
-      "If you can explain your product in one sentence, it's a feature, not a company.",
-      "Every great company looked like a joke at first. We're right on schedule."
-    ]},
-    {id:"humble",label:"Humble update",hype:0.6,posts:[
-      "Quietly crossed a milestone today. Won't say which. But the team knows. 🙏",
-      "Humbled to share we were doing {buzz} before it had a name.",
-      "Small win: an investor replied to my email in under a week. Onwards. 🚀",
-      "Didn't sleep much this week. Not all traction — mostly anxiety. But also traction. 🙏",
-      "Grateful for my team, who joined for equity and stayed for the mission.",
-      "Some personal news: I'm now 'in {buzz}'. Same me. Bigger me.",
-      "We turned down an acquisition conversation this week. Wrong partner, wrong time. Heads down.",
-      "Reflecting on the journey. The new office has a door.",
-      "A user emailed to say they 'kind of get what we do now'. Best day of my founder journey.",
-      "Blessed to announce I'll be speaking at a conference I'm also sponsoring.",
-      "Three years ago I had an idea. Today I have the same idea, but with a deck. 🙏",
-      "We're not raising. (We are raising. DMs open.)",
-      "Big week. Can't share details yet. Maybe ever.",
-      "Investor update sent. The chart only goes up. More soon. 🙏",
-      "Someone important followed us back today. 🙏"
-    ]},
-    {id:"subtweet",label:"Subtweet a competitor",hype:1.2,posts:[
-      "Funny how the 'category leader' shipped our roadmap six months after we tweeted it. No notes.",
-      "Some companies build. Others rebrand a wrapper and call it {buzz}. Anyway — big week for us.",
-      "Imagine raising $50M and your demo still buffers. Couldn't be us.",
-      "Raised the same week as us. Spent it on a rebrand. Bold.",
-      "Saw a 'thought leadership' post today that was just our blog with the nouns swapped. Flattered.",
-      "Crazy how the loudest {buzz} founders have the quietest changelogs.",
-      "A competitor called us 'irrelevant' on a podcast. Never had more signups. Thanks for the marketing.",
-      "Some of you raised on a Figma file and it shows.",
-      "Not subtweeting. Just observing. Loudly. With timestamps.",
-      "Their valuation is impressive. Their uptime, less so.",
-      "Congrats to the competition on the funding. The real winners are their landlords.",
-      "We don't name names. But if your logo is a gradient and you raised last week — this is about you.",
-      "Love seeing 'stealth' startups with a 40-slide public deck.",
-      "Their CEO posts about discipline every morning. Their app logged me out mid-demo."
-    ]},
-    {id:"milestone",label:"Announce a fake milestone",hype:1.8,posts:[
-      "Thrilled to announce we crossed 1,000,000 — API calls to our own health-check endpoint. LFG. 🚀",
-      "Huge milestone: we are now {buzz}-native. Nothing changed. Everything changed.",
-      "Excited to share we've achieved 99.9% uptime since launch. Reliability is a feature.",
-      "Our first enterprise logo is live. It's a name you know.",
-      "Processed our billionth token this week. Scale changes everything.",
-      "Proud to announce we've reached ramen profitability. The discipline era begins.",
-      "Milestone unlocked: more LinkedIn followers than active users. The flywheel is working.",
-      "Closed our biggest deal yet over a handshake. That's how trust works at this level.",
-      "Series A news soon. The term sheet conversation went incredibly well. 🚀",
-      "Crossed 10,000 users overnight. Growth compounds when you stop gatekeeping signups.",
-      "{buzz} is live in production. Performance exceeds internal benchmarks.",
-      "Officially a unicorn 🦄 — on a fully-diluted, forward-looking basis."
-    ]}
-  ],
-  flavor:{
-    nameLeft:["Synthetica","Loop","Hyper","Neural","Delv","Cogni","Nexus","Forge","Latent","Vector","Cere","Glean","Axiom","Substrate","Praxis","Modal","Cadence","Quanta","Aether","Cyber"],
-    nameRight:[".ai"," Labs"," AI"," Intelligence"," Dynamics"," Systems"," Compute"," Stack"," Mind"," Layer"," Works"," OS"," Cloud"," Core"," Impact","Genisys"],
-    taglines:[
-      "Pursuing a non-linear, transgressive business model in fluid hyper-niched markets.",
-      "Building category-defining infrastructure for the post-{buzz} economy.",
-      "We sit at the intersection of {buzz} and inevitability.",
-      "A foundational layer for the next generation of autonomous workflows.",
-      "Operationalizing {buzz} for forward-leaning enterprises.",
-      "Unbundling the value chain, then rebundling it, slightly differently.",
-      "Quietly building the rails for a world we can't yet describe.",
-      "We're not a product company. We're a thesis.",
-      "Default-alive, mission-driven, narrative-first.",
-      "Compounding leverage across the modern {buzz} stack.",
-      "Pre-revenue by design.",
-      "The exit is the product.",
-      "Solving intelligence. Then everything else. Then invoicing."
-    ],
-    headlines:[
-      "A solo founder raised $40M this week for a {buzz} layer on top of other {buzz} layers. The round was oversubscribed.",
-      "A competitor shipped a feature identical to your entire company. Analysts call it a strong signal for the category.",
-      "A 19-year-old dropped out to pursue {buzz} full-time. He has a waitlist and a manifesto.",
-      "Investors say {buzz} is entering its 'infrastructure phase.' Nobody defined the previous phase.",
-      "A widely-shared essay argues {buzz} will reshape civilization within 18 months. It has been argued before.",
-      "A major lab open-sourced something adjacent to your roadmap. The community is energized.",
-      "This quarter's consensus: revenue is a lagging indicator of vision.",
-      "A rival closed a Series B on a single slide reading '{buzz}' in Helvetica.",
-      "Several founders updated their bios to 'building.' The sector is heating up.",
-      "The market remains highly conviction-driven this quarter.",
-      "A unicorn announced layoffs and a vision, in that order.",
-      "An AI fund raised a fund to invest in AI funds. Oversubscribed.",
-      "Your category was declared dead and reborn twice this week."
-    ],
-    prWin:"FOR IMMEDIATE RELEASE — {name} today announced a {val} valuation, establishing the company as a definitional player in {buzz}. After {months} months of focused execution, the founder confirmed the company is pursuing a non-linear, category-creating approach to {buzz}, with revenue intentionally deferred to preserve optionality and narrative integrity. 'We're just getting started,' the founder said. {name} is hiring across all functions.",
-    prLose:"FOR IMMEDIATE RELEASE — {name} today announced a strategic transition into a reflective, founder-led next chapter. After {months} months pioneering {buzz}, the company made the difficult and courageous decision to extend its runway indefinitely. The founder, who remains incredibly energized about what's next, will take on advisory and angel roles effective immediately. {name} peaked at a {val} valuation. The {buzz} thesis, sources maintain, was directionally correct.",
-    levelUp:[
-      "Status upgrade: you're out of the Silicon Valley Startup Bootstrap Club and into the Startup Founders Club. You may now loiter in the café across from actual billionaires.",
-      "You got the good badge. People now reply to your DMs within a week.",
-      "An accelerator partner remembered your name.",
-      "Added to a group chat with three people who have exited. You mostly read.",
-      "TechCrunch put you on a 'ones to watch' list, category \"miscellaneous\".",
-      "Invited to speak on a panel about a topic you have not yet figured out.",
-      "A junior VC now describes you as 'on their radar.' Not the radar you really want to be on.",
-      "You unlocked the airport lounge of startups. Only standing tables, but the coffee is better."
-    ],
-    millionaire:[
-      "Congratulations — you're a millionaire! LMAO",
-      "🎉 $1M valuation! That's $0 in revenue and one very confident spreadsheet.",
-      "You feel like a millionaire. Your bank account remains a vibe.",
-      "Milestone: $1M valuation. Your mom is proud. Your landlord is still angry.",
-      "Seven figures! Of valuation. Which is like money, but legally not.",
-      "You crossed $1M. Investors call it 'traction'. The dictionary calls it 'nothing yet'."
-    ],
-    shipItems:[
-      "a snippet of code. More of a commit, really.",
-      "a critical bugfix, dressed up as a feature.",
-      "a new colour option for the login window.",
-      "some emoticons to \"enhance intercultural cooperation\".",
-      "accessibility improvements (the \"cancel\" button now works).",
-      "Excel integration (a macro you wrote in high-school).",
-      "a \"Small Business version\". Offered cousin Mark 1% equity for the logo. He went for a Big Mac.",
-      "Enterprise-tier hyper-threading aka a massive price increase.",
-      "a transmogrification engine for decoupling the back-propagation loop.",
-      "dark mode. Six zeros well spent.",
-      "really good integration with a service that just folded.",
-      "a mobile app! Technically, just the website in a box.",
-      "an international language pack. So far, it is just Spanish.",
-      "a Quantum-era Security module. A patch for a massive vulnerability.",
-      "AI-based voice mode. Five minutes of Claude time for the ElevenLabs API integration.",
-      "a browser-based version of the desktop app. But why?",
-      "advanced user-based rights management. So everyone can't read your email.",
-      "AI-optimized neural buffering. To explain the slow downloads.",
-      "transparent layering. (No one has asked.)",
-      "an AI roadmap generator (it generated this roadmap)",
-      "usage analytics that round up",
-      "a cool new feature. Your biggest competitor out-tweeted you by 15 minutes.",
-      "a biometric analysis toolkit. You can no longer use cats in profile pictures.",
-      "support for multimodal portfolio management. Can now use cat videos in customer emails.",
-      "a chatbot that answers questions about the chatbot",
-      "an enterprise SSO login three people will use",
-      "a redesigned landing page (again)",
-      "an API for a product that doesn't exist yet",
-      "a mobile app that is just the website in a box",
-      "a 'platform' (it's one button)",
-      "an onboarding flow longer than the product",
-      "a 'magic' button that calls someone else's API",
-      "a roadmap (shipped instead of the roadmap items)",
-      "an AI agent that books meetings about itself",
-      "a Slack integration nobody enabled",
-      "a 'beta' tag (the only new feature)",
-      "a pricing page for a product still in beta",
-      "a referral program for zero users",
-      "a notification system to remind you it exists",
-      "a 'community' (a Discord with four bots)",
-      "a Chrome extension that adds a button",
-      "an AI summarizer for the AI summaries",
-      "a loading animation (peak craftsmanship)",
-      "a settings page with one toggle",
-      "a 'V2' that is V1 with rounded corners",
-      "an integration with a startup that just shut down",
-      "a waitlist for the waitlist",
-      "a blockchain layer (for the investors)",
-      "a status page that only shows green",
-      "a feature flag for a feature that doesn't work yet",
-      "a personalized AI that forgets everything on refresh"
-    ],
-    replies:[
-      "@vc_chad: this is exactly why we passed.",
-      "@buildinpublic: bookmarking to feel something later.",
-      "@thiagoeth: respectfully, what does your company do?",
-      "@notabot_4471: 🔥🔥 incredible vision king",
-      "@latestage: my guy reinvented the spreadsheet again.",
-      "@seedstage_sam: DMing you (I will not be DMing you).",
-      "your mom liked this.",
-      "@deeptech_deb: source? (there is no source)",
-      "@founderhustle: saving this for my own thread tomorrow.",
-      "@quietLP: we are not adding to our position.",
-      "@ai_skeptic: 18 months away, as always.",
-      "@growthbro: what's the CAC on vibes?",
-      "@theinformation_fan: someone screenshot this for the obituary.",
-      "@anon_eng: I have worked here. Do not invest.",
-      "@panelmoderator: would love to have you speak (unpaid).",
-      "1 retweet, 0 customers, 4 quote-tweets calling you delusional.",
-      "@yc_w19: congrats on the milestone (which milestone)",
-      "@cynic.bsky: the valuation went up and the product went nowhere.",
-      "@dueDiligenceDan: checked the backend. there is no backend.",
-      "@LP_whisperer: we marked this position to zero in March.",
-      "@tokenizer: counted. most of them were 'the'.",
-      "@formeremployee2: the demo is hardcoded. source: I hardcoded it.",
-      "@founder_therapist: and how does the runway make you feel?",
-      "@indexfund_enjoyer: this is why I don't pick stocks.",
-      "@patentbot: this post is prior art now.",
-      "@unicorn_obituaries: bookmarked. you know why."
-    ],
-    ratioReplies:[
-      "the quote-tweets formed their own conference.",
-      "even your investors muted the thread.",
-      "@deeptech_deb: 'this is the most pre-revenue thing I've ever read.'",
-      "a competitor screenshotted it for their all-hands. as a warning.",
-      "TechCrunch reached out — for a piece on what not to do.",
-      "your own CVO replied 'who approved this'.",
-      "the ratio is now studied in business school. as a slide titled 'no'.",
-      "12k impressions, 11k of them disgusted.",
-      "someone made a parody account before you finished typing.",
-      "your mom did not like this one."
-    ]
-  }
-};
-
-//=================== STATE ===================
-function clone(o){return JSON.parse(JSON.stringify(o))}
-let S = load() || clone(SEED);
-if(!S||!S.meta||S.meta.version!=="1.1"||(S.upgrades&&S.upgrades[0]&&S.upgrades[0].insider)) S = clone(SEED);
-if(!S.flavor) S.flavor = clone(SEED.flavor);
-if(S.flavor && !S.flavor.levelUp) S.flavor.levelUp = clone(SEED.flavor.levelUp);
-if(S.flavor && !S.flavor.shipItems) S.flavor.shipItems = clone(SEED.flavor.shipItems);
-if(S.flavor && !S.flavor.millionaire) S.flavor.millionaire = clone(SEED.flavor.millionaire);
-if(S.flavor && !S.flavor.replies) S.flavor.replies = clone(SEED.flavor.replies);
-if(S.flavor && !S.flavor.ratioReplies) S.flavor.ratioReplies = clone(SEED.flavor.ratioReplies);
-if(S.balance && S.balance.millionaireValuation==null) S.balance.millionaireValuation = SEED.balance.millionaireValuation;
-if(S.balance && S.balance.pivotAP==null) S.balance.pivotAP = SEED.balance.pivotAP;
-if(S.balance && S.balance.maxPivotPerMonth==null) S.balance.maxPivotPerMonth = SEED.balance.maxPivotPerMonth;
-function load(){try{const d=localStorage.getItem("vibestudio");return d?JSON.parse(d):null}catch(e){return null}}
-function save(){localStorage.setItem("vibestudio",JSON.stringify(S));flash()}
-//=================== META (persists across runs, survives reseed) ===================
-let META=loadMeta();
-function loadMeta(){try{const d=localStorage.getItem("cofounderMeta");const m=d?JSON.parse(d):null;return Object.assign({founderCred:0,exits:0,plays:0,bestVal:0,fastestWin:0},m||{});}catch(e){return {founderCred:0,exits:0,plays:0,bestVal:0,fastestWin:0};}}
-function saveMeta(){try{localStorage.setItem("cofounderMeta",JSON.stringify(META));}catch(e){}}
-let saveTimer;function flash(){const e=document.getElementById("savestate");e.textContent="saved ✓";e.style.color="var(--accent)";clearTimeout(saveTimer);saveTimer=setTimeout(()=>{e.style.color="var(--dim)"},800)}
-
-//=================== TABS ===================
-const TABS=[["upgrades","Upgrades"],["buzzwords","Buzzwords"],["events","Events"],["angles","Post angles"],["flavor","Flavor"],["balance","Balance"],["preview","▶ Preview"],["json","JSON"]];
-const tabsEl=document.getElementById("tabs");
-TABS.forEach(([id,lbl],i)=>{const d=document.createElement("div");d.className="tab"+(i===0?" on":"");d.textContent=lbl;d.dataset.t=id;d.onclick=()=>showTab(id);tabsEl.appendChild(d)});
-function showTab(id){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.t===id));
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
-  document.getElementById("v_"+id).classList.add("on");
-  if(id==="preview"){if(!P)startPreview();else pvRender();}
-  if(id==="json")document.getElementById("jsonarea").value=JSON.stringify(S,null,2);
-}
-
-//=================== FIELD BIND ===================
-function setPath(obj,path,val){const p=path.split(".");let o=obj;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val}
-function inp(arr,idx,field,val,cls,ph){
-  const v=(typeof val==="number")?val:(val||"");
-  return `<input class="${cls||''}" data-arr="${arr}" data-idx="${idx}" data-field="${field}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ph||''}">`;
-}
-function txt(arr,idx,field,val){
-  return `<textarea data-arr="${arr}" data-idx="${idx}" data-field="${field}">${(val||"").replace(/</g,'&lt;')}</textarea>`;
-}
-document.addEventListener("input",e=>{
-  const t=e.target;if(!t.dataset)return;
-  if(t.dataset.flavor!==undefined){if(!S.flavor)S.flavor={};const f=t.dataset.flavor;if(f==="prWin"||f==="prLose")S.flavor[f]=t.value;else S.flavor[f]=t.value.split("\n").map(s=>s.trim()).filter(Boolean);save();return;}
-  if(t.dataset.arr===undefined)return;
-  const arr=t.dataset.arr,idx=+t.dataset.idx,field=t.dataset.field;
-  if(field==="posts"){S.postAngles[idx].posts=t.value.split("\n").map(s=>s.trim()).filter(Boolean);save();return;}
-  let val=t.value;if(t.type==="checkbox")val=t.checked;else if(t.classList.contains("num"))val=parseFloat(val)||0;
-  if(arr==="balance")setPath(S.balance,field,t.classList.contains("num")?(parseFloat(val)||0):val);
-  else setPath(S[arr][idx],field,val);
-  save();
-});
-document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-action]");if(!t)return;
-  const a=t.dataset.action,arr=t.dataset.arr,idx=+t.dataset.idx;
-  if(a==="del"){S[arr].splice(idx,1);save();renderAll()}
-  if(a==="add"){S[arr].push(blank(arr));save();renderAll()}
-});
-function blank(arr){
-  const nid="x"+rng().toString(36).slice(2,6);
-  if(arr==="upgrades")return{id:nid,cat:"tooling",name:"New upgrade",flavor:"",baseCost:100,hype:1,burn:1,trust:0};
-  if(arr==="buzzwords")return{id:nid,name:"New buzzword",flavor:"",mult:1,band:"plausible"};
-  if(arr==="events")return{id:nid,type:"buff",title:"New event",body:""};
-  if(arr==="postAngles")return{id:nid,label:"New angle",hype:1,posts:[]};
-}
-
-//=================== RENDERERS ===================
-function renderAll(){renderUpgrades();renderBuzz();renderEvents();renderAngles();renderFlavor();renderBalance()}
-
-function renderUpgrades(){
-  const cats=["tooling","marketing","hiring","fundraising","scale"];
-  let h=`<p class="hint">Each upgrade: name + flavor + base cost + <b>+hype/month</b> and <b>+burn/month</b> (double-edged) + a trust effect. <code class="k">cat</code> groups them.</p>`;
-  cats.forEach(c=>{
-    const items=S.upgrades.map((u,i)=>[u,i]).filter(([u])=>u.cat===c);
-    if(!items.length)return;
-    h+=`<div class="cat">${c}</div>`;
-    items.forEach(([u,i])=>{h+=upgradeCard(u,i)});
+/* Screenshotid on Play Store'i jaoks tehtud pildid, mida repos ei pruugi olla.
+   Näita sektsiooni AINULT siis, kui vähemalt üks pilt tegelikult laeb —
+   nii ei teki katkiseid pildikaste, kui store-assets kausta üles ei laetud. */
+(function () {
+  var block = document.getElementById("shotsBlock");
+  var imgs = Array.prototype.slice.call(document.querySelectorAll("#shots img"));
+  if (!imgs.length) return;
+  var ok = 0, done = 0;
+  imgs.forEach(function (img) {
+    var probe = new Image();
+    probe.onload = function () { ok++; finish(); };
+    probe.onerror = function () { img.remove(); finish(); };
+    probe.src = img.getAttribute("src");
   });
-  const other=S.upgrades.map((u,i)=>[u,i]).filter(([u])=>!cats.includes(u.cat));
-  if(other.length){h+=`<div class="cat">other</div>`;other.forEach(([u,i])=>h+=upgradeCard(u,i))}
-  h+=`<button class="add" data-action="add" data-arr="upgrades">+ Add upgrade</button>`;
-  document.getElementById("v_upgrades").innerHTML=h;
-}
-function upgradeCard(u,i){
-  return `<div class="card">
-    <div class="row">
-      <div class="f"><label>id</label>${inp("upgrades",i,"id",u.id)}</div>
-      <div class="f"><label>category</label><select data-arr="upgrades" data-idx="${i}" data-field="cat">${["tooling","marketing","hiring","fundraising","scale"].map(c=>`<option ${u.cat===c?"selected":""}>${c}</option>`).join("")}</select></div>
-      <div class="f"><label>base cost $</label>${inp("upgrades",i,"baseCost",u.baseCost,"num")}</div>
-      <div class="f"><label>+hype/mo</label>${inp("upgrades",i,"hype",u.hype,"num")}</div>
-      <div class="f"><label>+burn/mo</label>${inp("upgrades",i,"burn",u.burn,"num")}</div>
-      <div class="f"><label>multi-buy</label><input type="checkbox" data-arr="upgrades" data-idx="${i}" data-field="multi" ${u.multi?"checked":""}></div>
-      <button class="danger del" data-action="del" data-arr="upgrades" data-idx="${i}">✕</button>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <div class="f"><label>name</label>${inp("upgrades",i,"name",u.name,"wide")}</div>
-      <div class="f" style="flex:1"><label>flavor</label>${txt("upgrades",i,"flavor",u.flavor)}</div>
-    </div></div>`;
-}
-
-function renderBuzz(){
-  let h=`<p class="hint">The buzzword ladder. <b>mult</b> = the hype multiplier (exponential — climbing it is the path to unicorn).</p>`;
-  S.buzzwords.forEach((b,i)=>{
-    h+=`<div class="card"><div class="row">
-      <div class="f"><label>id</label>${inp("buzzwords",i,"id",b.id)}</div>
-      <div class="f"><label>mult ×</label>${inp("buzzwords",i,"mult",b.mult,"num")}</div>
-      <div class="f"><label>band</label><select data-arr="buzzwords" data-idx="${i}" data-field="band">${["plausible","stretching","absurd"].map(x=>`<option ${b.band===x?"selected":""}>${x}</option>`).join("")}</select></div>
-      <button class="danger del" data-action="del" data-arr="buzzwords" data-idx="${i}">✕</button></div>
-      <div class="row" style="margin-top:8px">
-        <div class="f"><label>name</label>${inp("buzzwords",i,"name",b.name,"wide")}</div>
-        <div class="f" style="flex:1"><label>flavor</label>${txt("buzzwords",i,"flavor",b.flavor)}</div></div></div>`;
-  });
-  h+=`<button class="add" data-action="add" data-arr="buzzwords">+ Add buzzword</button>`;
-  document.getElementById("v_buzzwords").innerHTML=h;
-}
-
-function renderEvents(){
-  let h=`<p class="hint">Events fire during the month resolve. <b>type:</b> buff (hype spike — <code class="k">hypeBoost ×</code>), debuff (−funding — <code class="k">debuffPct</code>), instant (one-time cash — <code class="k">instantPct</code>, min $20k), hype (multiply hype — <code class="k">hypeMult</code>, e.g. 0.85 = −15%), choice (two options). <b>needHire</b> = upgrade id (e.g. <code class="k">intern</code>): event only fires if you own that hire. Leave blank for always.</p>`;
-  S.events.forEach((e,i)=>{
-    h+=`<div class="card"><div class="row">
-      <div class="f"><label>id</label>${inp("events",i,"id",e.id)}</div>
-      <div class="f"><label>type</label><select data-arr="events" data-idx="${i}" data-field="type">${["buff","debuff","instant","hype","choice"].map(x=>`<option ${e.type===x?"selected":""}>${x}</option>`).join("")}</select></div>
-      <div class="f"><label>instantPct</label>${inp("events",i,"instantPct",e.instantPct||"","num")}</div>
-      <div class="f"><label>hypeBoost ×</label>${inp("events",i,"hypeBoost",e.hypeBoost||"","num")}</div>
-      <div class="f"><label>debuffPct</label>${inp("events",i,"debuffPct",e.debuffPct||"","num")}</div>
-      <div class="f"><label>hypeMult</label>${inp("events",i,"hypeMult",e.hypeMult||"","num")}</div>
-      <div class="f"><label>needHire (id)</label>${inp("events",i,"needHire",e.needHire||"")}</div>
-      <button class="danger del" data-action="del" data-arr="events" data-idx="${i}">✕</button></div>
-      <div class="row" style="margin-top:8px">
-        <div class="f"><label>title</label>${inp("events",i,"title",e.title,"wide")}</div>
-        <div class="f" style="flex:1"><label>body</label>${txt("events",i,"body",e.body)}</div></div></div>`;
-  });
-  h+=`<button class="add" data-action="add" data-arr="events">+ Add event</button>`;
-  document.getElementById("v_events").innerHTML=h;
-}
-
-function renderAngles(){
-  let h=`<p class="hint">Post angles (the choice layer). Each angle has a hype multiplier — at/above the ratio-risk line a post can get ratio'd. Rule: every choice must give a <b>different</b> outcome.</p>`;
-  S.postAngles.forEach((a,i)=>{
-    h+=`<div class="card"><div class="row">
-      <div class="f"><label>id</label>${inp("postAngles",i,"id",a.id)}</div>
-      <div class="f"><label>label</label>${inp("postAngles",i,"label",a.label,"wide")}</div>
-      <div class="f"><label>Hype ×</label>${inp("postAngles",i,"hype",a.hype,"num")}</div>
-      <button class="danger del" data-action="del" data-arr="postAngles" data-idx="${i}">✕</button></div>
-      <div class="f" style="margin-top:8px"><label>Posts — one per line · <code class="k">{buzz}</code> = current buzzword (${(a.posts||[]).length})</label>
-      <textarea data-arr="postAngles" data-idx="${i}" data-field="posts" style="width:100%;min-height:140px">${(a.posts||[]).join("\n").replace(/</g,'&lt;')}</textarea></div></div>`;
-  });
-  h+=`<button class="add" data-action="add" data-arr="postAngles">+ Add angle</button>`;
-  document.getElementById("v_angles").innerHTML=h;
-}
-
-function renderFlavor(){
-  if(!S.flavor)S.flavor=clone(SEED.flavor);
-  const F=S.flavor;
-  const ta=(k,val,min)=>`<textarea data-flavor="${k}" style="width:100%;min-height:${min||140}px">${(Array.isArray(val)?val.join("\n"):(val||"")).replace(/</g,'&lt;')}</textarea>`;
-  let h=`<p class="hint">Flavor text — does not change gameplay. <code class="k">{buzz}</code> = current buzzword; <code class="k">{name}</code> <code class="k">{val}</code> <code class="k">{months}</code> work in the press release. One entry per line (except press releases). Style: low-key, deadpan — don't say the joke out loud.</p><div class="card">
-    <div class="cat">Startup name — left + right halves combine</div>
-    <div class="row"><div class="f" style="flex:1"><label>left half (one per line)</label>${ta("nameLeft",F.nameLeft,120)}</div><div class="f" style="flex:1"><label>right half</label>${ta("nameRight",F.nameRight,120)}</div></div>
-    <div class="cat">Taglines</div>${ta("taglines",F.taglines)}
-    <div class="cat">"This Month in Tech" headlines</div>${ta("headlines",F.headlines)}
-    <div class="cat">End-of-year press release — WIN</div>${ta("prWin",F.prWin,120)}
-    <div class="cat">End-of-year press release — LOSS</div>${ta("prLose",F.prLose,120)}
-    <div class="cat">Millionaire lines ($1M milestone — 'you're a millionaire LOL')</div>${ta("millionaire",F.millionaire)}
-    <div class="cat">Level-up status lines ($100M milestone)</div>${ta("levelUp",F.levelUp)}
-    <div class="cat">Ship items — what you can build (⑤ Ship picks 3)</div>${ta("shipItems",F.shipItems)}
-  </div>`;
-  document.getElementById("v_flavor").innerHTML=h;
-}
-
-function renderBalance(){
-  const B=S.balance;
-  const fields=[
-    ["apPerMonth","AP / month","Action points per month (3 — every move counts; spend all to advance)"],
-    ["totalMonths","year length","Months in a run (12 — Siimu valik 11.06: andestab õppimist; algaja võidu-% ~2×)"],
-    ["unicornGoal","unicorn goal $","Valuation that counts as a win ($1B)"],
-    ["clickHype","post hype base","Hype per post (× angle × buzz)"],
-    ["valuationFactor","valuation factor","Valuation = Hype × buzzword-mult × this"],
-    ["marketRate","passive marketRate","Funding/month per hype unit (× passive-rate)"],
-    ["passiveFundingRate","passive-funding %","How weak the passive funding trickle is. Low = runway gets tense (idle doesn't cover burn)"],
-    ["raiseBase","raise-base hype","Hype threshold for the first round"],
-    ["raiseGrowth","raise-growth ×","Each round raises the threshold by this"],
-    ["raiseRate","raise-rate ×","Round lump = threshold × this × buzz-mult"],
-    ["costGrowth","costGrowth","Hire cost growth per purchase (1.15 = +15%)"],
-    ["decayPerMonth","decay / month","Buzzword freshness % lost per month"],
-    ["pivotTaxPct","pivotTaxPct","Pivot loses this fraction of funding (0.15 = 15%)"],
-    ["pivotAP","pivot cost (AP)","Action points a pivot costs (1 — pacing comes from max-pivots/month, not AP)"],
-    ["maxPivotPerMonth","max pivots / month","How many times you can pivot in one month (1 = paces the climb)"],
-    ["downRoundLoss","downRoundLoss","Down-round loses this fraction (0.4 = 40%)"],
-    ["bossTriggerValuation","boss @ valuation","Due-diligence boss fires when valuation first crosses this"],
-    ["hearingValuation","hearing @ valuation","Congressional-hearing boss fires when valuation first crosses this ($500M)"],
-    ["cofounderValuation","co-founder boss @ valuation","Co-founder-breakup boss fires when valuation first crosses this ($200M)"],
-    ["overheadBurnPct","overhead burn %","Monthly burn also includes this fraction of valuation (0.012 = 1.2%, noticeable but leaves room to hire/ship). The bigger you look, the more you burn pretending. <0.008 = decorative, 0.025+ = brutal"],
-    ["hireBurnMult","hire burn ×","Multiplies every upgrade's burn (12 = felt). Tradeoff strength of hiring"],
-    ["hireHypeMult","hire hype ×","Multiplies every upgrade's passive hype (20 = a real engine)"],
-    ["momentumCapPct","momentum cap %","Valuation drifts up to this % per month on its own (0.03 = 3%). Pure life/feel, capped so idling can't farm it"],
-    ["postHand","post hand size","How many posts you choose from (2 = one safe + one spicy)"],
-    ["shipHand","ship hand size","How many ship items you choose from (2)"],
-    ["ratioChance","ratio chance","Chance a high-hype post gets ratio'd (0.25 = 25%)"],
-    ["ratioFatiguePct","ratio fatigue / post","Push-your-luck: each extra post in the same month adds this to the ratio chance (0.12 = +12pp per post)"],
-    ["ratioRiskAbove","ratio risk above","Posts with hype × at/above this can be ratio'd"],
-    ["hireOfferChance","hire offer chance","Chance per month that an affordable hire DMs you (Hire is inbound now, not a button)"],
-    ["saleChance","sale chance (Ship)","Chance a Ship makes a real sale → valuation ×2"],
-    ["saleDecay","sale decay","Each real sale makes the next rarer: chance = saleChance / (1 + sales × this). 0 = constant (spammable), 0.7 = market wises up, 1 = real gamble"],
-    ["buyoutChance","buyout chance","Chance a real sale also triggers a buyout offer"],
-    ["millionaireValuation","millionaire @ valuation","Little 'you're a millionaire LOL' beat fires when valuation first crosses this ($1M)"],
-    ["levelUpValuation","level-up @ valuation","Pick-a-perk level-up fires when valuation first crosses this"],
-    ["monthDripSeconds","month length (sec)","How long each month 'plays out' as the numbers tick"],
-    ["dilutionPerRound","dilution / round","How much a standard raise dilutes your founder stake (0.12 = 12%)"]
-  ];
-  let h=`<p class="hint">Global balance numbers. Change them → open Preview → feel it. These are the heart of the game's fun.</p><div class="card">`;
-  fields.forEach(([k,lbl,desc])=>{
-    h+=`<div class="row" style="margin-bottom:10px;align-items:center">
-      <div class="f" style="width:200px"><label>${lbl}</label><small class="k">${k}</small></div>
-      ${inp("balance",0,k,B[k],"num")}
-      <div style="flex:1;color:var(--dim);font-size:12px">${desc}</div></div>`;
-  });
-  h+=`</div>`;
-  document.getElementById("v_balance").innerHTML=h;
-}
-
-//=================== PREVIEW ENGINE (turn-based) ===================
-let P=null;
-const B=()=>S.balance;
-function FL(){return S.flavor||SEED.flavor}
-function curBuzz(){return S.buzzwords[Math.min(P.buzz,S.buzzwords.length-1)]||{mult:1,name:"—",flavor:""}}
-function cycleMult(){if(!P)return 1;const s=(P.sincePivot==null)?99:P.sincePivot;return s<=0?1.15:(s===1?1:(s===2?0.925:0.85));} // hype cycle: peak right after a pivot, trough if you stall
-function buzzMult(){const fr=0.2+0.8*(P.freshness/100);return (curBuzz().mult||1)*fr*(P.buzzBonus||1)*cycleMult()}
-function burnMo(){let up=0;S.upgrades.forEach(u=>up+=(u.burn||0)*(P.owned[u.id]||0));up*=(B().hireBurnMult||1);return (up+valuation()*(B().overheadBurnPct||0))*(P.burnMult||1);}
-function credMult(){return 1+0.1*Math.sqrt(P.founderCred||0)} // diminishing: 1cred=1.1×, 9=1.3×, 33≈1.57×, 100=2×
-function credEdge(){return Math.min(0.3,(P.founderCred||0)*0.012)} // reputation bonus to boss-event odds, capped +30%
-function credRep(){return (P.founderCred||0)>=10} // a track record that speaks for itself
-function passiveHype(){let h=0;S.upgrades.forEach(u=>h+=(u.hype||0)*(P.owned[u.id]||0));return h*(B().hireHypeMult||1)*buzzMult()*credMult()*(P.pivotHypeMod||1)}
-function costOf(u){return Math.ceil(u.baseCost*Math.pow(B().costGrowth||1.15,P.owned[u.id]||0))}
-function runwayMo(){const b=burnMo();return b>0?P.funding/b:Infinity}
-function valuation(){return P.hype*buzzMult()*(B().valuationFactor||25)*(P.shipMult||1)}
-function stageName(){const v=valuation();const st=[[0,"Garage"],[100000,"Pre-seed"],[1000000,"Seed"],[50000000,"Series A"],[150000000,"Series B"],[400000000,"Series C"],[2000000000,"Scale-up"],[100000000000,"Pre-IPO"]];let n="Garage";st.forEach(x=>{if(v>=x[0])n=x[1]});return n}
-function hqName(){const v=valuation();const t=[[0,"Mom's garage"],[1e6,"A WeWork hot desk"],[1e7,"An office with a neon logo"],[1e8,"Two floors and a barista"],[5e8,"HQ tower (naming rights pending)"],[1e9,"A campus with a sculpture garden"]];let n=t[0][1];t.forEach(x=>{if(v>=x[0])n=x[1]});return n} // puhas flavor: kontor kasvab valuationiga
-// ===== SFX v2 — pehme süntees (sine/triangle), rohkem hetki. META.muted lülitab välja (Financials-sheetis).
-// NB: iOS Safari EI vibreeri kunagi (API puudub) ja hääletu-režiimis on ka heli vait — Apple'i reegel.
-const SFX_OPT={post:true,month:false}; // sagedased mikro-helid: Siimu lülitada
-let _ac=null;
-function _tone(t0,f,d,o2){
-  const o=_ac.createOscillator(),g=_ac.createGain(),at=(o2&&o2.at)||0,gn=(o2&&o2.gain)||0.07;
-  o.type=(o2&&o2.type)||"sine";o.frequency.setValueAtTime(f,t0+at);
-  if(o2&&o2.slideTo)o.frequency.exponentialRampToValueAtTime(o2.slideTo,t0+at+d);
-  g.gain.setValueAtTime(0.0001,t0+at);
-  g.gain.exponentialRampToValueAtTime(gn,t0+at+0.012);
-  g.gain.exponentialRampToValueAtTime(0.0001,t0+at+d);
-  o.connect(g);g.connect(_ac.destination);o.start(t0+at);o.stop(t0+at+d+0.03);
-}
-function sfx(kind){
-  if(META.muted)return;
-  try{
-    _ac=_ac||new (window.AudioContext||window.webkitAudioContext)();
-    if(_ac.state==="suspended")_ac.resume();
-    const t=_ac.currentTime,T=(f,d,o)=>_tone(t,f,d,o);
-    if(kind==="raise"){T(784,0.10);T(1175,0.10,{at:0.07});T(1568,0.22,{at:0.14,gain:0.06});} // cha-ching kvindiga
-    else if(kind==="sale"){T(1047,0.09);T(1568,0.20,{at:0.08});T(2093,0.18,{at:0.16,gain:0.05});}
-    else if(kind==="pivot"){T(330,0.28,{slideTo:990,type:"triangle",gain:0.08});} // tõusev sweep
-    else if(kind==="bad"){T(220,0.16,{type:"triangle"});T(185,0.28,{at:0.10,type:"triangle",gain:0.08});}
-    else if(kind==="boss"){T(98,0.5,{type:"sawtooth",gain:0.05});T(104,0.5,{type:"sawtooth",gain:0.05});T(196,0.18,{at:0.5,type:"triangle",gain:0.07});} // madal sting
-    else if(kind==="dm"){T(880,0.07,{gain:0.06});T(1320,0.12,{at:0.09,gain:0.06});} // sõnumi-ping
-    else if(kind==="ding"){T(1568,0.30,{gain:0.06});}
-    else if(kind==="level"){T(523,0.10);T(659,0.10,{at:0.09});T(784,0.20,{at:0.18});}
-    else if(kind==="downround"){T(160,0.16,{type:"square",gain:0.05});T(160,0.16,{at:0.24,type:"square",gain:0.05});}
-    else if(kind==="nemesis"){T(440,0.5,{slideTo:160,type:"triangle",gain:0.07});}
-    else if(kind==="win"){[523,659,784,1047].forEach((f,i)=>T(f,0.14,{at:i*0.10}));T(1319,0.4,{at:0.42,gain:0.06});}
-    else if(kind==="lose"){[392,330,262].forEach((f,i)=>T(f,0.22,{at:i*0.16,type:"triangle"}));}
-    else if(kind==="post"){if(SFX_OPT.post)T(660,0.045,{gain:0.035});}
-    else if(kind==="month"){if(SFX_OPT.month)T(130,0.08,{type:"triangle",gain:0.05});}
-  }catch(e){}
-  try{if(navigator.vibrate){const v={raise:30,sale:[30,30,30],pivot:20,bad:[60,40,60],boss:[120,60,120],dm:[20,40,20],ding:25,level:[30,30,60],downround:[80,60,80],nemesis:150,win:[40,40,40,40,160],lose:160,post:8}[kind];if(v)navigator.vibrate(v);}}catch(e){}
-}
-const ROUNDS=["Pre-seed","Seed","Series A","Series B","Series C","Series D","Series E","Mega-round"];
-function roundName(){return ROUNDS[Math.min(P.round||0,ROUNDS.length-1)]}
-function raiseThreshold(){return (B().raiseBase||250)*Math.pow(B().raiseGrowth||2.5,P.round||0)}
-function raiseLump(){return raiseThreshold()*(B().raiseRate||7)*buzzMult()}
-function pick(a){return a&&a.length?a[Math.floor(rng()*a.length)]:"";}
-function genName(){const F=FL();const L=F.nameLeft||["Vibe"],R=F.nameRight||[".ai"];return L[Math.floor(rng()*L.length)]+R[Math.floor(rng()*R.length)];}
-function updateGoalBar(){
-  if(!P)return;const f=document.getElementById("pv_goalfill");if(!f)return;
-  const v=Math.max(valuation(),1);
-  const pct=Math.max(0,Math.min(100,(Math.log10(v)-4)/5*100)); // log scale: $10K → $1B
-  f.style.width=pct+"%";
-  const ms=[["pv_ms1",1e6],["pv_ms2",1e8],["pv_ms3",1e9]];
-  ms.forEach(([id,t])=>{const el=document.getElementById(id);if(el)el.classList.toggle("hit",v>=t);});
-}
-let displayedVal=0,valAnimRunning=false;
-function animVal(){const el=document.getElementById("pv_val");if(!P||!el){valAnimRunning=false;return;}const target=valuation();if(Math.abs(target-displayedVal)<Math.max(1,target*0.003))displayedVal=target;else displayedVal+=(target-displayedVal)*0.16;el.textContent="$"+fmt(displayedVal);requestAnimationFrame(animVal);}
-function popText(t,col){const d=document.createElement("div");d.textContent=t;d.style.cssText="position:fixed;left:50%;top:98px;font-family:var(--mono);font-weight:700;font-size:18px;color:"+(col||"var(--accent)")+";pointer-events:none;z-index:60;animation:popup 1s ease-out forwards";document.body.appendChild(d);setTimeout(()=>d.remove(),1000);}
-function flashHero(){const hc=document.getElementById("pv_hero");if(hc){hc.classList.remove("flash");void hc.offsetWidth;hc.classList.add("flash");}}
-function renderPR(win){let t=(win?FL().prWin:FL().prLose)||"";return t.replace(/\{name\}/g,P.name||"Your startup").replace(/\{val\}/g,"$"+fmt(valuation())).replace(/\{buzz\}/g,curBuzz().name).replace(/\{months\}/g,P.month);}
-// Teemad muudavad BRUTALIST-paleti muutujaid (--ylw/--mg/--rd/--grn) — telefonimäng kasutab neid,
-// mitte vanu Studio --accent värve (bug: skinid "ei teinud midagi", Siim 11.06).
-const THEMES=[{id:"default",name:"Default",cred:0,vars:{}},{id:"yc",name:"YC beige",cred:1,vars:{"--ylw":"#eed9a6","--mg":"#b9803c","--grn":"#7a8a4a"}},{id:"neon",name:"Crypto neon",cred:3,vars:{"--ylw":"#3ef5c9","--mg":"#7a5cff","--rd":"#ff3ea5"}},{id:"noir",name:"Theranos noir",cred:6,vars:{"--ylw":"#cfcfcf","--mg":"#8a2020","--grn":"#3f5d52"}},{id:"rams",name:"Dieter Rams",cred:10,vars:{"--ylw":"#f07f1f","--mg":"#5f6b72","--rd":"#cf3a12"}}];
-let curTheme="default";
-function applyTheme(id){const t=THEMES.find(x=>x.id===id)||THEMES[0];curTheme=id;const root=document.getElementById("v_preview");if(!root)return;["--ylw","--mg","--rd","--grn","--paper","--accent","--accent2","--mag"].forEach(v=>root.style.removeProperty(v));Object.keys(t.vars).forEach(k=>root.style.setProperty(k,t.vars[k]));}
-
-//=================== FOUNDER ARCHETYPES (Founder Cred unlocks) ===================
-const ARCHETYPES=[
-  {id:"dropout",cred:0,name:"The Dropout",flavor:"Stanford, three semesters. The hoodie is load-bearing.",fx:"Baseline. Pure vibes.",mod:{}},
-  {id:"nepo",cred:1,name:"The Nepo Baby",flavor:"Your father 'knows people.' The people are him.",fx:"Start with $25K family money · posts hit 15% softer (nobody takes you seriously)",mod:{funding:25000,post:0.85}},
-  {id:"mckinsey",cred:3,name:"The Ex-McKinsey Partner",flavor:"A framework for everything, including frameworks.",fx:"Pivots cost zero funding tax · posts hit 20% softer",mod:{pivotTax:0,post:0.8}},
-  {id:"crypto",cred:5,name:"The Failed Crypto Founder",flavor:"Your last whitepaper is Exhibit C.",fx:"Start with Pre-seed already closed (+$15K) · ratio risk +50% (people remember)",mod:{round:1,addFunding:15000,ratio:1.5}},
-  {id:"exlab",cred:8,name:"The Ex-Frontier-Lab Researcher",flavor:"You can actually build. Investors find this confusing.",fx:"Ships make a real sale 2× as often · raises come in 30% smaller",mod:{sale:2,raise:0.7}}
-];
-function applyArchetype(a){
-  P.archetype=a.id;P.archName=a.name;
-  const m=a.mod||{};
-  if(m.funding!=null)P.funding=m.funding;
-  if(m.addFunding)P.funding+=m.addFunding;
-  if(m.round!=null)P.round=m.round;
-  P.archPostMod=m.post||1;P.archRatioMod=m.ratio||1;P.archSaleMod=m.sale||1;P.archRaiseMod=m.raise||1;
-  P.archPivotAP=(m.pivotAP!=null)?m.pivotAP:null;P.archPivotTaxMod=(m.pivotTax!=null)?m.pivotTax:null;
-  feedPush({text:"Founder: "+a.name+" — "+a.flavor,sub:a.fx,h:0,label:"founder"});
-  pvRender();
-}
-// rng(): üks vahekiht Math.randomi peal — kõik gameplay-loosid käivad siit läbi,
-// nii et seeded-režiimi saab kunagi tagasi tuua ühe reaga. (Daily eemaldatud 10.06, Siimu otsus.)
-let _rng=Math.random;
-function rng(){return _rng();}
-function pivotAPCost(){return (P&&P.archPivotAP!=null)?P.archPivotAP:(B().pivotAP||1);}
-function pickArchetype(){
-  const unlocked=ARCHETYPES.filter(a=>(META.founderCred||0)>=a.cred);
-  if(unlocked.length<=1){applyArchetype(ARCHETYPES[0]);return;}
-  const locked=ARCHETYPES.filter(a=>(META.founderCred||0)<a.cred);
-  bossModal({sfx:null,header:"👤 New run",title:"Choose your founder",
-    body:"Who are you this time?"+(locked.length?(" Locked: "+locked.map(a=>a.name+" ("+a.cred+" cred)").join(", ")+"."):""),
-    options:unlocked.map(a=>({label:a.name+" — "+a.fx,resolve:()=>applyArchetype(a)}))});
-}
-
-function startPreview(){newRun(true);}
-function newRun(fullReset){
-  META.plays=(META.plays||0)+1;saveMeta();
-  P={hype:0,funding:1000,totalRaised:0,totalHype:0,owned:{},buzz:0,freshness:100,shipMult:1,sales:0,ownership:100,personalCash:0,
-     founderCred:(META.founderCred||0),exits:(META.exits||0),round:0,pivotHypeMod:1,feed:[],
-     month:1,ap:(B().apPerMonth||3),over:null,lastCred:0,bossDD:false,bossCofounder:false,sincePivot:99,apBonus:0,buzzBonus:1,burnMult:1,leveledUp:false,pvThisMo:0,postsThisMo:0,usedShips:[],usedPosts:[],peakVal:0,worstMonth:0,worstVal:Infinity,bestPost:null,bestPostH:0};
-  S.upgrades.forEach(u=>P.owned[u.id]=0);
-  P.name=genName();P.tagline=pick(FL().taglines);displayedVal=0;P.hand=drawHand();P.shipHand=drawShipHand();
-  P.paperTrail=0;
-  let nn=genName();for(let i=0;i<5&&nn===P.name;i++)nn=genName();
-  P.nemesis={name:nn,val:(0.8+rng()*0.8)*1e6,won:false}; // su rivaal — kasvab ise, feed räägib temast
-  onboardCards();
-  runStatusCard();
-  monthBudget();
-  renderPreviewShell();
-  startTick();
-  pvRender();
-  pickArchetype();
-}
-function burnNote(rw){
-  let pool;
-  if(rw===Infinity) pool=["No operating burn recorded this period.","Net burn is effectively zero this month."];
-  else if(rw>=8) pool=["Cash position remains comfortable at the current burn rate.","Reserves are well above projected spend.","Liquidity is not a constraint this period."];
-  else if(rw>=4) pool=["Reserves cover several months at present spend.","Burn is steady; no immediate funding requirement.","Cash runway remains within normal operating range."];
-  else if(rw>=2) pool=["Runway is tightening; a funding round may be warranted.","At the current rate, reserves will require replenishment within a quarter.","Cash coverage is below the level typically held in reserve."];
-  else pool=["Reserves now sit below two months of operating expenses.","Operating cash is approaching a critical threshold.","Liquidity is materially constrained at the current burn."];
-  return pick(pool);
-}
-function founderLevel(){
-  const ex=(META.exits||0), n=(META.plays||1);
-  if(ex>=2) return "Serial unicorn ×"+ex;
-  if(ex===1) return "2nd unicorn";
-  if(n>=3) return "Serial founder";
-  if(n===2) return "2nd-time founder";
-  return "First-timer";
-}
-function runStatusCard(){
-  const n=META.plays||1, ex=META.exits||0;
-  let t=null;
-  if(ex>=2) t="🔁 Serial unicorn founder — "+ex+" exits and counting. The press calls it 'a playbook'. Nobody asks about revenue anymore.";
-  else if(ex===1) t="🔁 Building your second unicorn. You've done this once — this time you know it's vibes all the way down.";
-  else if(n>=3) t="🔁 Serial entrepreneur (attempt #"+n+"). Still pre-revenue, still pitching. The LinkedIn bio says 'multi-time founder'.";
-  else if(n===2) t="🔁 Back for round two. The first one was 'a learning experience'. Onwards. 🚀";
-  if(t)feedPush({text:t,label:"founder"});
-}
-function onboardCards(){
-  if((META.plays||0)===2)feedPush({text:"🔓 Unlocked: 🎨 skins — top bar, next to ↻.",label:"how to play"});
-  if((META.plays||0)>2)return; // only first couple of runs
-  // three digestible cards instead of one wall of text. feedPush unshifts, so push in
-  // reverse — the feed then reads top→bottom: Goal, Your moves, How to win.
-  feedPush({text:"How to win: the buzzword ladder is the engine. Raise a round, then ③ Pivot to a hotter buzzword — that's what multiplies your valuation. Posting & shipping feed the hype that lets you raise. Build nothing, narrate everything.",label:"how to play"});
-  feedPush({text:"Your 4 moves — 1 AP each:\n① Post — tweet for hype (each extra post a month risks a ratio)\n② Raise — take investors' money\n③ Pivot — climb the buzzword ladder (needs a fresh round)\n④ Ship — maybe make a real sale\nHiring? Talent DMs you between months.",label:"how to play"});
-  feedPush({text:"Goal: hit a $1B valuation before month "+(B().totalMonths||12)+" ends. Revenue optional, vision mandatory. "+(B().apPerMonth||3)+" action points a month — spend them all to advance.",label:"how to play"});
-}
-function clamp(x){return Math.max(0,Math.min(100,x))}
-function canAct(){return P&&!P.over&&P.ap>0}
-function feedPush(o){P.feed=P.feed||[];P.feed.unshift(o);if(P.feed.length>300)P.feed.pop()}
-let pvTimer=null;
-function startTick(){if(pvTimer)clearInterval(pvTimer);pvTimer=setInterval(pvTickStep,200);}
-function monthBudget(){P.dStep=0;P.dSteps=Math.max(5,Math.round((B().monthDripSeconds||20)*5));}
-function rebudget(){}
-function tickHype(){return passiveHype();}
-function tickFund(){return passiveHype()*(B().marketRate||0.5)*(B().passiveFundingRate||0.15)-burnMo();}
-function applyRemainingDrip(){if(!P)return;const tot=P.dSteps||40,rem=tot-(P.dStep||0);if(rem>0){const fh=tickHype()*rem/tot;P.hype+=fh;P.totalHype+=fh;const ff=tickFund()*rem/tot;P.funding+=ff;if(ff>0)P.totalRaised+=ff;}P.dStep=P.dSteps;}
-function pvTickStep(){
-  // Turn-based money (burn applied at month-end, see nextMonth — no countdown pressure).
-  // The only live motion: valuation gently creeps UP each month via "momentum", capped so idling can't farm it.
-  if(!P||P.over)return;
-  if(document.getElementById("modal").style.display==="flex"||document.getElementById("bossmodal").style.display==="flex"||pvSheet==="boss")return;
-  if(P.momStartHype==null){P.momStartHype=P.hype;P.momAdded=0;}
-  const cap=Math.max(0,P.momStartHype)*(B().momentumCapPct||0.03);
-  if(cap>0 && (P.momAdded||0)<cap){
-    const add=Math.min(cap/(P.dSteps||100), cap-(P.momAdded||0)); // spread the monthly allowance across the whole month window
-    if(add>0){P.hype+=add;P.totalHype+=add;P.momAdded=(P.momAdded||0)+add;
-      const he=document.getElementById("pv_hype");if(he)he.textContent=fmt(P.hype);
-      updateGoalBar();checkWin();if(P.over)pvRender();}
+  function finish() {
+    if (++done < imgs.length) return;
+    if (ok > 0) block.hidden = false;
   }
-}
-function reanchorMomentum(){if(P){P.momStartHype=P.hype;P.momAdded=0;}} // a fresh action gives a new little wave of momentum
-function flatPosts(){const out=[];S.postAngles.forEach(a=>{(a.posts||[]).forEach(t=>out.push({text:t,hype:a.hype||1,angle:a.label}));});return out;}
-function drawHand(){
-  const used=(P&&P.usedPosts)||[];const all=flatPosts().filter(p=>used.indexOf(p.text)<0);
-  const n=B().postHand||3,riskLine=B().ratioRiskAbove||1.5;
-  const risky=all.filter(p=>(p.hype||1)>=riskLine),safe=all.filter(p=>(p.hype||1)<riskLine);
-  const h=[];
-  const take=pool=>{if(!pool.length)return false;const x=pool.splice(Math.floor(rng()*pool.length),1)[0];const j=all.indexOf(x);if(j>=0)all.splice(j,1);h.push(x);return true;};
-  if(n>=2){take(risky);take(safe);} // guarantee: one gamble, one safe play
-  while(h.length<n&&all.length){h.push(all.splice(Math.floor(rng()*all.length),1)[0]);}
-  for(let i=h.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));const t=h[i];h[i]=h[j];h[j]=t;} // shuffle order
-  return h;
-}
-function ratioChanceNow(){return Math.min(0.85,((B().ratioChance||0.25)+(B().ratioFatiguePct||0.12)*(P.postsThisMo||0))*(P.archRatioMod||1));} // push-your-luck: every extra post this month tires the audience
-function doPost(post){
-  if(!canAct())return;P.ap--;
-  P.usedPosts=P.usedPosts||[];P.usedPosts.push(post.text||"");
-  if(/milestone/i.test(post.angle||""))P.paperTrail=(P.paperTrail||0)+0.5; // fake milestone = pool valet (bossivaled kaaluvad rohkem; muidu on igaüks Exhibit A)
-  const text=(post.text||"").replace(/\{buzz\}/g,curBuzz().name);
-  const risky=(post.hype||1)>=(B().ratioRiskAbove||1.5);
-  const rc=ratioChanceNow();
-  P.postsThisMo=(P.postsThisMo||0)+1;
-  if(risky&&rng()<rc){
-    P.hype*=0.9;
-    popText("Ratio'd 📉","var(--bad)");
-    sfx("bad");
-    feedPush({text:text,sub:"📉 Ratio'd — "+(pick((FL().ratioReplies||["the replies were brutal."]))),h:0,label:"ratio"});
-    P.hand=drawHand();checkWin();pvRender();return;
-  }
-  const h=(B().clickHype||1500)*(post.hype||1)*buzzMult()*credMult()*(P.pivotHypeMod||1)*(P.archPostMod||1);
-  P.hype+=h;P.totalHype+=h;reanchorMomentum();
-  if(h>(P.bestPostH||0)){P.bestPostH=h;P.bestPost=text;}
-  sfx("post");
-  popText("+"+fmt(h)+" Hype","var(--accent2)");
-  const rep=rng()<0.5?pick(FL().replies||[]):"";
-  feedPush({text:text,sub:rep||null,h:h,label:"post"});
-  P.hand=drawHand();
-  checkWin();pvRender();
-}
-function drawShipHand(){const used=(P&&P.usedShips)||[];const pool=(FL().shipItems||[]).filter(x=>used.indexOf(x)<0);const h=[];const n=B().shipHand||3;for(let k=0;k<n&&pool.length;k++){const i=Math.floor(rng()*pool.length);h.push(pool.splice(i,1)[0]);}return h;}
-function ship(item){
-  if(!canAct())return;P.ap--;
-  const raw=(typeof item==="string"&&item)?item:"a feature";
-  const what=raw.replace(/[.\s]+$/,"");
-  P.usedShips=P.usedShips||[];P.usedShips.push(raw);
-  const h=(B().clickHype||3500)*0.6*buzzMult()*credMult()*(P.pivotHypeMod||1);
-  P.hype+=h;P.totalHype+=h;reanchorMomentum();
-  if(rng()<(B().saleChance||0.15)*(P.archSaleMod||1)/(1+(P.sales||0)*(B().saleDecay||0))){
-    P.sales=(P.sales||0)+1;P.shipMult=(P.shipMult||1)*2;P.buzzBonus=(P.buzzBonus||1)*0.92; // revenue is a curse: real money makes investors ask about profit → narrative cools
-    popText("REAL SALE 🤑 valuation ×2","var(--accent)");
-    sfx("sale");
-    feedPush({text:"Shipped "+what+" — and someone actually PAID for it. The market is losing its mind. Valuation doubled.",sub:"…but a journalist noticed you have revenue now. Investors want to discuss 'the path to profit.' Narrative cooled −8%.",h:0,label:"sale"});
-    toast("good","A REAL SALE","Revenue?! Valuation doubled.");
-    if(rng()<(B().buyoutChance||0.4))offerBuyout();
-  } else {
-    popText("Shipped","var(--dim)");
-    feedPush({text:"Shipped "+what+(/[!?…]$/.test(what)?"":"."),h:h,label:"ship"});
-  }
-  P.shipHand=drawShipHand();
-  checkWin();pvRender();
-}
-function canRaiseNow(){return !!P&&!P.over&&P.ap>0&&P.hype>=raiseThreshold();}
-function applyRaise(kind){
-  if(!canAct())return;
-  if(P.hype<raiseThreshold())return;
-  P.ap--;
-  sfx("raise");
-  const base=raiseLump()*(P.archRaiseMod||1),dil=(B().dilutionPerRound||0.12),rn=roundName();
-  if(kind==="secondary"){const f=base*0.85,cash=valuation()*0.04;P.funding+=f;P.totalRaised+=f;P.personalCash=(P.personalCash||0)+cash;P.ownership=(P.ownership||100)*(1-dil*1.7);P.round=(P.round||0)+1;popText("+$"+fmt(cash)+" to YOU 🤑","var(--accent)");feedPush({text:"Closed "+rn+" + a secondary — you pocketed $"+fmt(cash)+" personally (safe whatever happens).",h:0,label:"raise"});}
-  else if(kind==="friendly"){const f=base*0.6;P.funding+=f;P.totalRaised+=f;P.ownership=(P.ownership||100)*(1-dil*0.4);P.round=(P.round||0)+1;popText("+$"+fmt(f),"var(--gold)");feedPush({text:"Closed "+rn+" on founder-friendly terms: +$"+fmt(f)+", barely diluted.",h:0,label:"raise"});}
-  else {P.funding+=base;P.totalRaised+=base;P.ownership=(P.ownership||100)*(1-dil);P.round=(P.round||0)+1;popText("+$"+fmt(base),"var(--gold)");feedPush({text:"Closed "+rn+" (standard): +$"+fmt(base),h:0,label:"raise"});}
-  checkWin();pvRender();
-}
-function pivot(){
-  if(!P||P.over)return;
-  const pvAP=pivotAPCost(), pvCap=B().maxPivotPerMonth||99;
-  if(P.buzz>=S.buzzwords.length-1){toast("bad","At the top","You're at the top of the buzzword ladder.");return;}
-  if(P.round<=P.buzz){toast("bad","No traction yet","You need to raise first — you can't claim a new buzzword without the next round.");return;}
-  if((P.pvThisMo||0)>=pvCap){toast("bad","One pivot a month","You've already pivoted this month. Let the narrative breathe.");return;}
-  if(P.ap<pvAP){toast("bad","Not enough AP","A pivot costs "+pvAP+" action points.");return;}
-  P.ap-=pvAP;
-  P.pvThisMo=(P.pvThisMo||0)+1;
-  P.buzz++;
-  P.sincePivot=0; // restart the hype cycle at its peak
-  P.freshness=100;P.funding-=P.funding*(B().pivotTaxPct||0.15)*(P.archPivotTaxMod!=null?P.archPivotTaxMod:1);
-  popText("🔥 "+curBuzz().name,"var(--mag)");flashHero();sfx("pivot");rebudget();
-  feedPush({text:"Pivot → "+curBuzz().name,h:0,label:"pivot"});
-  checkWin();pvRender();
-}
-const NEMESIS_LINES=[
-  "📰 {name} raised again. The deck was one slide. The slide said 'inevitability'. Valuation: {val}.",
-  "📰 {name} announced a strategic partnership with a company that makes printers. {val}.",
-  "📰 {name}'s founder did an eleven-stop podcast tour. Zero questions about revenue. {val}.",
-  "📰 {name} open-sourced a README. The community called it 'bold'. {val}.",
-  "📰 {name} hired three VPs of AI in one week. {val} and climbing.",
-  "📰 Leaked: {name}'s product is a spreadsheet. The valuation rose to {val} on the news.",
-  "📰 {name} got a profile titled 'The Anti-Hype Founder'. It mentions hype 31 times. {val}.",
-  "📰 {name} declared this 'the year of agents'. Investors nodded slowly. {val}.",
-  "📰 {name}'s founder bought a watch that costs more than your runway. {val}.",
-  "📰 {name} is 'profitable on a vibes-adjusted basis', says their CFO. {val}."
-];
-const IDLE_LINES=[
-  "You spent the rest of the month doomscrolling. The feed won. It always does.",
-  "Unused energy went into rearranging the Notion workspace. It is beautiful now. Nothing else changed.",
-  "You drafted four posts and published none. 'Strategic silence,' you tell the team.",
-  "The remaining time was spent A/B testing your own LinkedIn banner.",
-  "You attended a founder dinner. Everyone pitched everyone. Nobody listened.",
-  "You rebalanced the fantasy cap table again. It's beautiful. It's not real."
-];
-function nextMonth(){
-  if(!P||P.over)return;
-  if(P.ap>0){feedPush({text:pick(IDLE_LINES),h:0,label:"founder"});P.ap=0;}
-  // monthly settle (applied once, here — not in real time)
-  const passiveH=tickHype();
-  if(passiveH){P.hype+=passiveH;P.totalHype+=passiveH;}
-  const burnNow=burnMo();
-  const ff=tickFund();
-  P.funding+=ff;if(ff>0)P.totalRaised+=ff;
-  if(burnNow>=1){const rw=runwayMo(); // burn-kaart ainult siis kui see on PÄRIS uudis — muidu risustab timeline'i (runway-riba hero's näitab nagunii)
-    if(rw!==Infinity&&rw<4)feedPush({text:"📉 Burn is eating the runway — $"+fmt(burnNow)+" this month, "+fmt(rw)+" months left.",sub:burnNote(rw),h:0,label:"burn event"});}
-  P.rebrandedMo=false;P.momStartHype=null;P.momAdded=0;
-  P.freshness=Math.max(0,P.freshness-(B().decayPerMonth||22));
-  if(S.events.length&&rng()<0.6)monthlyEvent();
-  if(P.funding<0)downRound();
-  checkWin();
-  if(P.over){pvRender();return;}
-  if(P.month>=(B().totalMonths||10)){endRun("lose");pvRender();return;}
-  P.month++;P.ap=(B().apPerMonth||3)+(P.apBonus||0);P.pvThisMo=0;P.postsThisMo=0;P.sincePivot=(P.sincePivot==null?99:P.sincePivot)+1;
-  sfx("month");
-  const hl=pick(FL().headlines);if(hl&&rng()<0.5)feedPush({text:"📰 "+hl.replace(/\{buzz\}/g,curBuzz().name),h:0,trust:0,label:"This month in tech"}); // 50% kuudest — timeline puhtam
-  if(P.nemesis){ // rivaal kasvab omasoodu — umbes pooltes runides jõuab $1B-ni enne kuud 10
-    P.nemesis.val*=(1.7+rng()*0.8);
-    if(!P.nemesis.won&&P.nemesis.val>=1e9){
-      P.nemesis.won=true;
-      feedPush({text:"🦄 "+P.nemesis.name+" just hit a $1B valuation — before you. Their founder posted a thread thanking 'the haters'.",h:0,label:"rival"});
-      toast("bad","Your rival is a unicorn",P.nemesis.name+" got there first.");
-      sfx("nemesis");
-    } else if(!P.nemesis.won&&rng()<0.5){
-      const ln=pick(NEMESIS_LINES);
-      feedPush({text:ln.replace(/\{name\}/g,P.nemesis.name).replace(/\{val\}/g,"$"+fmt(P.nemesis.val)),h:0,label:"rival"});
-    }
-  }
-  monthBudget();
-  pvRender();
-  maybeHailMary(); // kaotava runi eelviimane kuu: üks viimane riskantne kang (muidu on kuud 9-10 surnud venitus)
-  maybeHireOffer(); // hiring is inbound now — talent DMs you between months
-}
-function maybeHailMary(){
-  if(!P||P.over||P.hailMary||pvSheet)return;
-  if(P.month!==(B().totalMonths||10)-1)return;
-  if(valuation()>=(B().unicornGoal||1e9)*0.5)return; // kui oled niikuinii rajal, ei paku
-  P.hailMary=true;
-  bossModal({optional:true,header:"🛟 Last call",title:"The Hail Mary round",
-    body:"A sovereign wealth fund 'with appetite for narrative' offers to lead one final mega-round. Half their partners believe in you. The other half just want to watch. 50/50.",
-    options:[
-      {label:"Take it — all-in on the story",resolve:()=>{
-        if(rng()<0.5){const g=raiseLump()*3;P.funding+=g;P.totalRaised+=g;P.round=(P.round||0)+1;P.ownership=(P.ownership||100)*(1-(B().dilutionPerRound||0.12)*1.5);
-          feedPush({text:"The mega-round closed: +$"+fmt(g)+" and a fresh round on the books. The press used 'visionary' unironically.",h:0,label:"raise"});toast("good","Mega-round closed","+$"+fmt(g)+" — one more shot.");sfx("raise");}
-        else{P.hype*=0.75;P.totalHype*=0.75;
-          feedPush({text:"The mega-round collapsed on the partner call. Someone asked about revenue. The silence is now a meme. −25% hype.",h:0,label:"crisis"});toast("bad","It fell through","Hype −25%.");sfx("bad");}
-      }},
-      {label:"Pass — dignity is a moat",resolve:()=>{feedPush({text:"Passed on the 'strategic' mega-round. The fund led your rival's round instead.",h:0,label:"founder"});}}
-    ]});
-}
-const HIRE_DM_LINES=[
-  "Their cover letter is a thread.",
-  "They list 'founder energy' under technical skills.",
-  "Their last three employers no longer exist.",
-  "They open with 'big fan of the vision'. They have not seen the product. (Nobody has.)",
-  "Recruiter says they're 'a culture add'. The culture is LinkedIn."
-];
-function maybeHireOffer(){
-  if(!P||P.over||pvSheet)return; // never stack on a boss / open sheet
-  const m=document.getElementById("modal");if(m&&m.style.display==="flex")return; // or on a choice-event modal
-  if(rng()>=(B().hireOfferChance||0.5))return;
-  const pool=S.upgrades.filter(u=>(u.multi||!(P.owned[u.id]||0))&&P.funding>=costOf(u));
-  if(!pool.length)return;
-  const u=pool[Math.floor(rng()*pool.length)],c=costOf(u);
-  bossModal({optional:true,header:"📩 Inbound",title:"Talent slid into your DMs",
-    body:pick(HIRE_DM_LINES)+" "+u.name+" — "+(u.flavor||"")+" Joining adds +"+fmt((u.hype||0)*(B().hireHypeMult||1))+" hype/mo and +$"+fmt((u.burn||0)*(B().hireBurnMult||1))+" burn/mo.",
-    options:[
-      {label:"Hire — $"+fmt(c)+" (no AP, just money)",resolve:()=>{P.funding-=c;P.owned[u.id]=(P.owned[u.id]||0)+1;feedPush({text:"Hired: "+u.name,sub:u.flavor,h:0,label:"hire"});toast("good","Hired",u.name);}},
-      {label:"Pass — protect the burn",resolve:()=>{feedPush({text:"Passed on "+u.name+". They joined a competitor and posted a thread about it.",h:0,label:"hire"});}}
-    ]});
-}
-function monthlyEvent(){
-  // hire-conditional events only fire if you own the relevant hire (needHire = upgrade id).
-  // Iga event max 1× runi jooksul (Siim 12.06: "Steven Bartlett ei tohi kaks korda mainida").
-  P.usedEvents=P.usedEvents||[];
-  const pool=S.events.filter(e=>(!e.needHire||(P.owned[e.needHire]||0)>0)&&P.usedEvents.indexOf(e.id)<0);
-  if(!pool.length)return;
-  const e=pool[Math.floor(rng()*pool.length)];
-  P.usedEvents.push(e.id);
-  if(e.type==="choice"&&e.choice){
-    const cash=e.choice.a.cash||50000;
-    modal(e.title,e.body,e.choice.b.label,e.choice.a.label,
-      ()=>{if(rng()<0.7){P.funding+=cash*2;P.totalRaised+=cash*2;toast("good","2× came through!","+$"+fmt(cash*2));}else toast("bad","The round fell through","$0");checkWin();pvRender();},
-      ()=>{P.funding+=cash;P.totalRaised+=cash;toast("good","+$"+fmt(cash),"In the bank.");checkWin();pvRender();});
-    return;
-  }
-  let msg="";
-  if(e.type==="instant"){const a=Math.max(20000,P.funding*(e.instantPct||0.1));P.funding+=a;P.totalRaised+=a;msg="+$"+fmt(a);}
-  else if(e.type==="buff"){const a=(B().clickHype||1500)*(e.hypeBoost||8)*buzzMult()*credMult()*(P.pivotHypeMod||1);P.hype+=a;P.totalHype+=a;msg="+"+fmt(a)+" hype";}
-  else if(e.type==="debuff"){const loss=P.funding*(e.debuffPct||0.15);P.funding-=loss;msg="−$"+fmt(loss);}
-  else if(e.type==="hype"){const before=P.hype;P.hype*=(e.hypeMult!=null?e.hypeMult:1);const d=Math.round(P.hype-before);msg=(d>=0?"+":"")+fmt(d)+" hype";}
-  feedPush({text:e.title+(msg?"  "+msg:""),sub:e.body,h:0,label:"event"});
-  // toasti EI tee — sama info on juba feedi-kaardina (topelt-popup segas mängimist, Siimu flag 11.06)
-}
-function downRound(){
-  const loss=(B().downRoundLoss||0.4);
-  P.hype*=(1-loss);P.totalHype*=(1-loss);
-  const bridge=burnMo()*6+5000;
-  P.funding=bridge;
-  P.ownership=(P.ownership||100)*0.95; // down-round lahjendab founderit −5% (Siim 12.06)
-  sfx("downround");
-  feedPush({text:"DOWN-ROUND — you ran out of cash. Emergency money came in at a 'revised' valuation: hype −"+Math.round(loss*100)+"%, your stake −5%, $"+fmt(bridge)+" wired in. Flat is the new up.",h:0,label:"crisis"});
-  toast("bad","Down-round","Hype −"+Math.round(loss*100)+"% · your stake −5% · emergency cash in.");
-}
-function checkWin(){
-  if(!P||P.over)return;
-  const v=valuation();if(v>(P.peakVal||0)){P.peakVal=v;P.peakMonth=P.month;}
-  if(!P.milestoneM&&v>=(B().millionaireValuation||1000000))millionaireMilestone();
-  if(!P.leveledUp&&v>=(B().levelUpValuation||100000000))levelUp();
-  // bossid käivituvad KOHE läve ületamisel (mitte ainult kuuvahetusel) — muidu hüppab kiire lõpp
-  // kuulamis-bossist (parim setpiece) lihtsalt üle. Üks boss korraga; järgmine tuleb järgmisel checkWin-il.
-  if(pvSheet!=="boss"){
-    if(!P.bossDD&&v>=(B().bossTriggerValuation||50000000)){P.bossDD=true;bossModal(BOSS_DD);}
-    else if(!P.bossCofounder&&v>=(B().cofounderValuation||200000000)){P.bossCofounder=true;bossModal(BOSS_COFOUNDER);}
-    else if(!P.bossHearing&&v>=(B().hearingValuation||500000000)){P.bossHearing=true;bossModal(BOSS_HEARING);}
-  }
-  if(pvSheet!=="boss"&&v>=(B().unicornGoal||1e9)&&!P.exitChoosing){P.exitChoosing=true;exitChoice();}
-}
-function millionaireMilestone(){
-  P.milestoneM=true;
-  sfx("ding");
-  const ln=pick(FL().millionaire);if(ln)feedPush({text:"🎉 "+ln,h:0,label:"milestone"});
-  toast("good","Millionaire (lol)","$1M valuation. Revenue: still $0.");
-}
-function levelUp(){
-  P.leveledUp=true;
-  const ln=pick(FL().levelUp);if(ln)feedPush({text:"🏆 "+ln,h:0,label:"perk unlocked"});
-  bossModal({sfx:"level",header:"📈 Milestone",title:"LEVEL UP — you crossed $100M",body:"You're officially 'a real company' now (allegedly). Pick a permanent perk for the rest of the run:",options:[
-    {label:"+1 action point every month",resolve:()=>{P.apBonus=(P.apBonus||0)+1;P.ap=(P.ap||0)+1;toast("good","+1 AP","More leadership to show.");}},
-    {label:"+25% to hype & valuation (hotter narrative)",resolve:()=>{P.buzzBonus=(P.buzzBonus||1)*1.25;toast("good","Hotter narrative","+25% multiplier.");}},
-    {label:"Halve your monthly burn (efficiency)",resolve:()=>{P.burnMult=(P.burnMult||1)*0.5;toast("good","Leaner","Burn cut in half.");}}
-  ]});
-}
-// ===== PAPER TRAIL — iga vale jätab jälje. Ei muuda runi mehaanikat, aga kirjutab epiloogi. =====
-function ptGrade(){const n=P.paperTrail||0;return n<=1?"Clean(ish)":(n<=4?"Concerning":"Exhibit A");}
-function ptEpilogue(win){
-  const n=Math.round(P.paperTrail||0);if(n<=1)return "";
-  if(win)return n<=4?"A journalist is 'working on something' about your milestones.":"Eighteen months later: the SEC would like a word about "+n+" 'forward-looking statements'.";
-  return n<=4?"On the bright side, nobody audits a $0 company.":"The post-mortem thread had receipts. All "+n+" of them.";
-}
-function pocketMoney(){ // PÄRIS raha founderi taskus — paberi-valuation EI OLE sinu raha (Siimu fix 11.06)
-  const eq=(P.ownership||100)/100*valuation();
-  if(P.over==="acquihire")return (P.personalCash||0)+eq; // ostja maksis päriselt välja
-  if(P.over==="win"&&(P.exitType==="buyout"||P.exitType==="bigtech"))return (P.personalCash||0)+eq; // firma müüdi raha eest
-  return P.personalCash||0; // IPO / cash-out / kaotus: osalus on paber (lockup) — päris on ainult see, mis vahepeal taskusse võtsid
-}
-function paperStake(){return (P.ownership||100)/100*valuation();}
-// ===== EXIT CHOICE — $1B hetkel valid, mis legendiks sa saad. Kõik kolm on võidud, epiloog erineb. =====
-function exitChoice(){
-  bossModal({sfx:"level",header:"🦄 $1,000,000,000",title:"You're a unicorn. Pick your exit",
-    body:"The valuation is real (it isn't). The money is real (it's paper). Time to decide what kind of legend you become.",
-    options:[
-      {label:"IPO — ring the bell",resolve:()=>{P.exitType="ipo";P.epilogue="COFND opened at $42, 'priced for perfection'. It now trades at $17. You are still unfathomably rich. Retail is not.";endRun("win");}},
-      {label:"Sell to Big Tech",resolve:()=>{P.exitType="bigtech";P.epilogue="Acquired by a company with a search engine. The press release said 'incredible journey'. The product was sunset in six months. The team got hoodies.";endRun("win");}},
-      {label:"Stay private — quietly sell YOUR shares",resolve:()=>{P.exitType="cashout";const c=valuation()*0.15;P.personalCash=(P.personalCash||0)+c;P.epilogue="You took 'partial liquidity' ($"+fmt(c)+"). The company is 'still crushing it', you explain, from a boat.";endRun("win");}}
-    ]});
-}
-function endRun(result){
-  P.over=result;
-  META.raisedAll=(META.raisedAll||0)+(P.totalRaised||0);META.roundsAll=(META.roundsAll||0)+(P.round||0); // $0 Club karjäärinumbrid
-  sfx(result==="win"?"win":(result==="acquihire"?"sale":"lose"));
-  const finalVal=valuation();
-  let g;
-  if(result==="win"){g=Math.max(1,Math.floor(Math.sqrt(P.totalRaised/50000)));P.exits=(P.exits||0)+1;META.exits=(META.exits||0)+1;
-    if(!META.fastestWin||P.month<META.fastestWin)META.fastestWin=P.month;}
-  else if(result==="acquihire"){g=1;META.acquihires=(META.acquihires||0)+1;} // EI suurenda exits/fastestWin — see polnud unicorn
-  else {const pk=Math.max(P.peakVal||0,finalVal);g=pk>=10000000?Math.max(1,Math.floor(Math.sqrt(pk/40000000))):0;} // cred kaotuse eest PEAK'i järgi (mitte lõppväärtuse)
-  P.lastCred=g;
-  META.founderCred=(META.founderCred||0)+g;P.founderCred=META.founderCred;
-  if(finalVal>(META.bestVal||0))META.bestVal=finalVal;
-  saveMeta();
-}
-function offerBuyout(){
-  const amt=valuation();
-  sfx("dm");
-  modal("An acquirer wants to buy you","Now that you have real revenue, a buyer showed up. They'll acquire you for $"+fmt(amt)+" — a guaranteed exit. Or hold out for the $1B unicorn.","Hold out for unicorn","Take the buyout",
-    ()=>{P.hype*=1.1;feedPush({text:"Turned down an acquisition offer. 'We're just getting started.'",h:0,label:"buyout"});toast("good","Held out","Bullish signal. +10% hype.");pvRender();},
-    ()=>{
-      // alla $50M pole see exit vaid ACQUIHIRE — eraldi lõpp, ei anna unicorn-exitit ega fastestWin'i ("müüsid liiga vara" on omaette nali)
-      if(valuation()>=50000000){P.exitType="buyout";endRun("win");}
-      else{P.exitType="acquihire";P.epilogue="Acquihired for $"+fmt(valuation())+". The product was sunset before the press release dried. Your LinkedIn says 'excited for the next chapter.' The team got hoodies.";endRun("acquihire");}
-      pvRender();
-    });
-}
-function bossModal(boss){
-  // Render boss / archetype / level-up as a brutalist bottom-sheet (same skin as the action sheets),
-  // not the dark center modal. Mandatory: no X, scrim/tap can't dismiss — you must choose.
-  const body=document.getElementById("pv_sheetbody"),ttl=document.getElementById("pv_sheettitle"),xb=document.getElementById("pv_sheetx");
-  if(!body){legacyBossModal(boss);return;} // safety: shell not mounted
-  pvBoss=boss;pvSheet=boss.optional?"offer":"boss"; // "offer" = dismissable (hire DMs etc), "boss" = mandatory
-  if(xb)xb.style.display=boss.optional?"":"none";
-  const sk=("sfx" in boss)?boss.sfx:(boss.optional?"dm":"boss");if(sk)sfx(sk); // sting bossile, ping DM-ile; boss.sfx üle-kirjutab (null = vaikne)
-  ttl.textContent=boss.title||"Decision";
-  let h="";
-  if(boss.header)h+=`<div class="pv-bosskind">${(boss.header||"").replace(/</g,'&lt;')}</div>`;
-  if(boss.body)h+=`<p class="pv-hint">${(boss.body||"").replace(/</g,'&lt;')}</p>`;
-  if(boss.meter){try{h+=boss.meter();}catch(e){}} // scrutiny meter: show WHY a stat-gated choice will pass/fail
-  boss.options.forEach((o,i)=>{h+=`<button class="pv-choice" data-boss="${i}"><div class="pv-ct">${(o.label||"").replace(/</g,'&lt;')}</div></button>`;});
-  body.innerHTML=h;
-  body.querySelectorAll("[data-boss]").forEach(el=>{el.onclick=()=>{const i=+el.dataset.boss,opt=pvBoss&&pvBoss.options[i];_closeSheetNow();if(opt){opt.resolve();checkWin();pvRender();}};});
-  const s=document.getElementById("pv_sheet"),sc=document.getElementById("pv_scrim");
-  if(s)s.classList.add("on");if(sc)sc.classList.add("on");
-}
-function legacyBossModal(boss){
-  document.getElementById("bmkind").textContent=boss.header||"⚠ Boss event";
-  document.getElementById("bmt").textContent=boss.title;
-  document.getElementById("bmb").textContent=boss.body;
-  const opts=document.getElementById("bmopts");opts.innerHTML="";
-  boss.options.forEach(o=>{const b=document.createElement("button");b.style.cssText="text-align:left;padding:10px 12px;font-size:13px";b.textContent=o.label;b.onclick=()=>{document.getElementById("bossmodal").style.display="none";o.resolve();checkWin();pvRender();};opts.appendChild(b);});
-  document.getElementById("bossmodal").style.display="flex";
-}
-const BOSS_COFOUNDER={
-  header:"🤝 Boss event",
-  meter:()=>{const leak=Math.max(0,Math.round((0.4-credEdge())*100));return `<div class="pv-meter ${leak<=25?'ok':'warn'}"><div class="pv-metert">Diluting quietly leaks ~${leak}% of the time</div><div class="pv-metern">Higher reputation = lower leak risk.</div></div>`;},
-  title:"Your co-founder wants out",
-  body:"They wrote the original prototype and the Notion doc that became your seed deck. Now they want liquidity — and they still hold a chunk of the company.",
-  options:[
-    {label:"Buy them out (expensive — you keep control)",resolve:()=>{
-      const cost=Math.max(50000,valuation()*0.05);P.funding-=cost;P.ownership=Math.min(100,(P.ownership||100)+7);
-      feedPush({text:"Bought out your co-founder for $"+fmt(cost)+". You now own "+Math.round(P.ownership)+"%. The all-hands was 'emotional'.",h:0,label:"buyout"});
-      toast("good","Bought out","+7% ownership, −$"+fmt(cost)+".");
-    }},
-    {label:"Dilute them quietly in the next round",resolve:()=>{
-      P.paperTrail=(P.paperTrail||0)+1;
-      P.ownership=Math.min(100,(P.ownership||100)+5);
-      if(rng()<0.4-credEdge()){P.hype*=0.85;P.totalHype*=0.85;feedPush({text:"The cap-table 'cleanup' leaked. 'Founder squeezed out co-founder', the thread reads. −15% hype.",h:0,label:"scandal"});toast("bad","It leaked","+5% stake, but −15% hype.");}
-      else{feedPush({text:"Quietly diluted your co-founder. The press release thanks them 'for their foundational contributions.' +5% to you.",h:0,label:"buyout"});toast("good","Handled","+5% ownership, no noise.");}
-    }},
-    {label:"Amicable split — post a heartfelt thread",resolve:()=>{
-      const a=(B().clickHype||3500)*5*buzzMult()*credMult()*(P.pivotHypeMod||1);P.hype+=a;P.totalHype+=a;P.shipMult=(P.shipMult||1)*0.9;
-      feedPush({text:"'After 7 incredible months, we're consciously uncoupling.' The thread did 2M views. They took the IP, though. +"+fmt(a)+" hype.",h:a,label:"boss"});
-      toast("good","Gracious exit","Huge thread — but they kept the product.");
-    }}
-  ]
-};
-const BOSS_DD={
-  title:"An investor wants to do due diligence",
-  meter:()=>{const thr=raiseThreshold();const ch=[["Real revenue (a sale)",(P.sales||0)>0],["Hype ≥ "+fmt(thr*1.2),P.hype>=thr*1.2],["Buzz tier ≥ 4 (you: "+(P.buzz||0)+")",(P.buzz||0)>=4],["Founder reputation",credRep()]];const ok=ch.some(c=>c[1]);let h=`<div class="pv-meter ${ok?'ok':'warn'}"><div class="pv-metert">${ok?"✓ Your story checks out — the vision deck lands":"⚠ Thin story — they'll dig into revenue"}</div>`;ch.forEach(c=>h+=`<div class="pv-meterr">${c[1]?"✓":"✗"} ${c[0]}</div>`);return h+`<div class="pv-metern">Meeting any one is enough.</div></div>`;},
-  body:"They've asked for financials, customer references, and a code review. You have $0 in revenue, a vision, and a cousin.",
-  options:[
-    {label:"Walk them through the vision deck",resolve:()=>{
-      const byRep=credRep()&&!(P.sales>0||P.hype>=raiseThreshold()*1.2||P.buzz>=4);
-      if(P.sales>0||P.hype>=raiseThreshold()*1.2||P.buzz>=4||credRep()){const g=raiseLump()*1.4;P.funding+=g;P.totalRaised+=g;feedPush({text:"DD passed — "+(byRep?"your track record as a "+founderLevel()+" did the talking. ":"the investor 'gets the vision'. ")+"+$"+fmt(g),h:0,trust:0,label:"boss"});toast("good","They're in",(byRep?"Your reputation carried it.":"Dazzled by the narrative.")+" +$"+fmt(g));}
-      else{P.hype*=0.9;feedPush({text:"DD: they kept asking about revenue. No round.",h:0,label:"boss"});toast("bad","No round","They kept asking about revenue.");}
-    }},
-    {label:"Introduce them to a 'design partner' (your cousin)",resolve:()=>{const g=raiseLump()*0.6;P.funding+=g;P.totalRaised+=g;feedPush({text:"DD: a 'design partner' vouched for you. Partial pass.",h:0,label:"boss"});toast("good","Partial pass","Smaller cheque. +$"+fmt(g)+".");}},
-    {label:"Massage the numbers",resolve:()=>{
-      P.paperTrail=(P.paperTrail||0)+2;
-      if(rng()<0.55+credEdge()){const g=raiseLump()*2;P.funding+=g;P.totalRaised+=g;feedPush({text:"DD: the numbers held up (this time). +$"+fmt(g),h:0,trust:0,label:"boss"});toast("good","It worked","Big round. +$"+fmt(g));}
-      else{P.hype*=0.5;P.totalHype*=0.5;feedPush({text:"Sources: $"+fmt(valuation())+" startup could not produce a single paying customer.",h:0,label:"scandal"});toast("bad","They caught it","Scandal. Hype halved.");}
-    }},
-    {label:"Stall — raise a bridge instead",resolve:()=>{const g=raiseLump()*0.4;P.funding+=g;P.totalRaised+=g;feedPush({text:"Skipped DD, raised a small bridge. +$"+fmt(g),h:0,trust:0,label:"boss"});toast("good","Bridged","Bought time. +$"+fmt(g));}}
-  ]
-};
-const BOSS_HEARING={
-  header:"⚖ Boss event",
-  meter:()=>{const p=Math.round((0.55+credEdge())*100);return `<div class="pv-meter ${p>=60?'ok':'warn'}"><div class="pv-metert">Going full visionary lands ~${p}% of the time</div><div class="pv-metern">Founder reputation improves the odds.</div></div>`;},
-  title:"You've been summoned to a congressional hearing",
-  body:"A senator has printed out your posts. All of them. In a binder. C-SPAN is live and your general counsel has stopped blinking.",
-  options:[
-    {label:"Read the lawyer-approved statement",resolve:()=>{
-      P.hype*=0.95;
-      feedPush({text:"You said nothing, beautifully, for four hours. The market barely noticed.",h:0,label:"boss"});
-      toast("good","Survived","No clips, no quotes, −5% hype. The lawyers framed the transcript.");
-    }},
-    {label:"Go full visionary — testify about the future",resolve:()=>{
-      if(rng()<0.55+credEdge()){const a=(B().clickHype||3500)*12*buzzMult()*credMult()*(P.pivotHypeMod||1);P.hype+=a;P.totalHype+=a;
-        feedPush({text:"'Senator, with respect — the future does not testify.' The clip is everywhere. A senator asked about angel allocation.",h:a,label:"boss"});
-        toast("good","Iconic","The clip went viral. +"+fmt(a)+" hype.");}
-      else{P.hype*=0.7;P.totalHype*=0.7;
-        feedPush({text:"You said 'I'll get back to you on that' 41 times. The supercut has a theme song now.",h:0,label:"scandal"});
-        toast("bad","The supercut","Hype −30%. The theme song slaps, though.");}
-    }},
-    {label:"Blame your biggest competitor",resolve:()=>{
-      const a=(B().clickHype||3500)*6*buzzMult()*credMult()*(P.pivotHypeMod||1);P.hype+=a;P.totalHype+=a;
-      const legal=P.funding*0.1;P.funding-=legal;
-      feedPush({text:"The committee nodded along. The competitor's lawyers sent a calendar invite. +"+fmt(a)+" hype, −$"+fmt(legal)+" legal.",h:a,label:"boss"});
-      toast("good","Deflected","They're the problem now. Legal fees apply.");
-    }},
-    {label:"Donate to both parties (quietly)",resolve:()=>{
-      P.paperTrail=(P.paperTrail||0)+1;
-      const cost=P.funding*0.15;P.funding-=cost;
-      const a=(B().clickHype||3500)*3*buzzMult()*credMult()*(P.pivotHypeMod||1);P.hype+=a;P.totalHype+=a;
-      feedPush({text:"The hearing is postponed indefinitely. Democracy thanks you for your support. −$"+fmt(cost),h:a,label:"boss"});
-      toast("good","Postponed","Indefinitely. −$"+fmt(cost)+".");
-    }}
-  ]
-};
-
-// ===== AD SEAMS (prototype). Monetization is a later phase — flip these to preview placement + its cost. =====
-// Real AdMob "native advanced" ads supply these same fields (advertiser, headline, body, cta, +icon/image)
-// as DATA from Google's network; you just bind them to this template. Banner/interstitial are easy in a
-// WebView; native needs a JS bridge (native layer fetches the NativeAd, passes assets in, reports clicks).
-let ADS={banner:true,native:true}; // bänner JÄÄB (Siimu otsus 11.06) — ruum võideti hoopis lamedamatest action-nuppudest ja kaartidest
-const PROMOS=[
-  {advertiser:"Acme Cloud",headline:"Ship 10× faster on Acme Cloud",body:"The infra behind 3 of last year's unicorns. Start free.",cta:"Start free"},
-  {advertiser:"HyperSaaS",headline:"Your competitors already run HyperSaaS",body:"Dashboards, an AI copilot, and a synergy score.",cta:"Book a demo"},
-  {advertiser:"VC Match",headline:"Warm intros to 400+ investors",body:"Upload your deck — we do the rest. Pre-revenue welcome.",cta:"Get intros"}
-];
-const BANNERS=[
-  {logo:"AC",color:"#1f9d55",advertiser:"Acme Cloud",line:"Scale to 1B users (you have 0)",cta:"Install"},
-  {logo:"HS",color:"#c026a8",advertiser:"HyperSaaS",line:"The dashboard for your dashboards",cta:"Open"},
-  {logo:"VC",color:"#b8860b",advertiser:"VC Match",line:"Investors are one tap away",cta:"Get"},
-  {logo:"PP",color:"#e5342a",advertiser:"PromptPay",line:"Monetize your vibes today",cta:"Try"}
-];
-function bannerHTML(b){
-  return `<span class="pv-adlogo" style="background:${b.color}">${b.logo}</span><span class="pv-adtxt"><b>${(b.advertiser||"").replace(/</g,'&lt;')}</b> <span class="pv-adtag">Ad</span><br>${(b.line||"").replace(/</g,'&lt;')}</span><span class="pv-adcta">${(b.cta||"Open").replace(/</g,'&lt;')}</span>`;
-}
-function promoCardHTML(p){
-  return `<div class="pv-post pv-promo"><div class="pv-promobar"><span class="pv-promotag">Ad · Sponsored</span><span class="pv-adchoices">ⓘ AdChoices</span></div><div class="pv-who">${(p.advertiser||"Advertiser").replace(/</g,'&lt;')}</div><div class="pv-ptxt">${(p.headline||"").replace(/</g,'&lt;')}</div>${p.body?`<div class="pv-ptxt" style="color:#3a362e;margin-top:2px">${(p.body||"").replace(/</g,'&lt;')}</div>`:""}<div class="pv-pmeta"><span class="pv-cta">${(p.cta||"Learn more").replace(/</g,'&lt;')}</span></div></div>`;
-}
-function feedHTMLWithAds(items){
-  if(!ADS.native||!(items&&items.length))return (items||[]).map(feedRowHTML).join("");
-  const out=[];let pi=0;
-  items.forEach((f,idx)=>{out.push(feedRowHTML(f));if((idx+1)%5===0){out.push(promoCardHTML(PROMOS[pi%PROMOS.length]));pi++;}});
-  return out.join("");
-}
-function advancedUnlocked(){return (META.plays||0)>=2;} // run #1 stays clean: flex/skins/daily appear from the 2nd run
-function renderPreviewShell(){
-  pvSheet=null;
-  const adv=advancedUnlocked();
-  document.getElementById("v_preview").innerHTML=`
-  <style>
-  #v_preview{--paper:#f4f1e9;--bk:#111;--ylw:#ffd400;--rd:#e5342a;--grn:#1f9d55;--mg:#c026a8;--gld:#b8860b;--mut:#6b6760}
-  #v_preview .pvskins{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--dim);margin-bottom:10px;justify-content:center}
-  #v_preview .pvwrap{display:flex;justify-content:center;padding:2px 0 10px}
-  #v_preview .pvph{position:relative;width:390px;max-width:100%;height:768px;background:var(--paper);color:#111;
-    border:3px solid var(--bk);box-shadow:8px 8px 0 var(--bk);overflow:hidden;display:flex;flex-direction:column;
-    font-family:"Helvetica Neue",Arial,sans-serif}
-  #v_preview .pvph button{font-family:inherit}
-  #v_preview .pv-hero{border-bottom:3px solid var(--bk);padding:6px 13px 6px}
-  #v_preview .pv-r{display:flex;align-items:center;gap:8px}
-  #v_preview .pv-bw{justify-content:space-between}
-  #v_preview .pv-co{font-weight:800;font-size:18px;letter-spacing:-.3px;color:#111}
-  #v_preview .pv-rebrand{font-size:10.5px;line-height:1;font-weight:800;text-transform:uppercase;letter-spacing:.4px;border:2px solid var(--bk);height:34px;padding:0 10px;background:var(--ylw);color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-  #v_preview .pv-restart{font-size:11px;font-weight:800;border:2px solid var(--bk);padding:8px 11px;background:#fff;color:#111;text-transform:uppercase;cursor:pointer}
-  #v_preview .pv-revpill{font-family:var(--mono);font-weight:700;font-size:12px;background:var(--rd);color:#fff;border:2px solid var(--bk);padding:2px 7px;white-space:nowrap}
-  #v_preview .pv-tag2{font-size:10.5px;color:var(--mut);font-style:italic;margin-top:2px}
-  #v_preview .pv-status{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
-  #v_preview .pv-chip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;border:2px solid var(--bk);padding:2px 5px;background:#fff;color:#111;white-space:nowrap}
-  #v_preview .pv-chip.lvl{background:var(--ylw)}
-  #v_preview .pv-vrow{display:flex;align-items:center;gap:10px;margin-top:6px} /* number + siht-riba ÜHEL real (Siimu soov 11.06) */
-  #v_preview .pv-vbig{font-family:var(--mono);font-weight:800;font-size:26px;line-height:1;letter-spacing:-1px;color:#111;flex-shrink:0}
-  #v_preview .pv-vsub{font-size:10.5px;color:var(--mut);font-style:italic;margin-top:2px}
-  #v_preview .pv-goalw{flex:1;min-width:0}
-  #v_preview .pv-goalbar{position:relative;height:9px;border:2px solid var(--bk);background:#fff}
-  #v_preview .pv-goalfill{height:100%;background:var(--bk);width:0%}
-  #v_preview .pv-gtick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--bk)}
-  #v_preview .pv-goallabs{position:relative;height:14px;margin-top:2px;font-size:9.5px;font-weight:800;letter-spacing:.4px;color:var(--mut)}
-  #v_preview .pv-goallabs span{position:absolute;transform:translateX(-50%);padding:0 3px;white-space:nowrap}
-  #v_preview .pv-goallabs span.hit{background:var(--ylw);color:#111}
-  #v_preview .pv-stats{display:flex;margin-top:9px;border:2px solid var(--bk);background:#fff}
-  #v_preview .pv-st{flex:1;padding:5px 8px;border-right:2px solid var(--bk)}
-  #v_preview .pv-st:last-child{border-right:0}
-  #v_preview .pv-st .k{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--mut)}
-  #v_preview .pv-st .v{font-family:var(--mono);font-weight:700;font-size:14px;margin-top:1px;color:#111}
-  #v_preview .pv-rww{margin-top:7px}
-  #v_preview .pv-rwlab{display:flex;justify-content:space-between;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)}
-  #v_preview .pv-rwbar{height:9px;border:2px solid var(--bk);background:#fff;margin-top:3px;display:flex}
-  #v_preview .pv-rwfill{height:100%;background:var(--grn);width:100%}
-  #v_preview #pv_rwburn{height:100%;background:var(--rd)} /* selle kuu burn — punane tükk kassast */
-  #v_preview .pv-month{display:flex;align-items:center;gap:8px;padding:4px 13px;border-bottom:3px solid var(--bk);background:var(--ylw)}
-  #v_preview .pv-mlab{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#111}
-  #v_preview .pv-aplab{font-size:10px;font-weight:800;text-transform:uppercase;color:#5a4d00}
-  #v_preview .pv-ap{margin-left:auto;font-family:var(--mono);font-weight:800;font-size:15px;letter-spacing:2px;color:#111}
-  #v_preview .pv-buzz{padding:5px 13px;border-bottom:3px solid var(--bk);background:var(--paper);font-size:11px}
-  #v_preview .pv-buzztop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  #v_preview .pv-buzz b{text-transform:uppercase;font-weight:800;color:var(--mg)}
-  #v_preview .pv-buzzfl{font-style:italic;color:var(--mut);margin-top:2px;line-height:1.3}
-  #v_preview .pv-fresh{font-family:var(--mono);font-weight:800;color:#111}
-  #v_preview .pv-feedhd{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:7px 13px 3px}
-  #v_preview .pv-feed{flex:1;overflow-y:auto;padding:0 13px 10px}
-  #v_preview .pv-empty{color:var(--mut);font-size:11px;padding:8px 0}
-  #v_preview .pv-post{border:2px solid var(--bk);background:#fff;padding:6px 8px;margin-bottom:6px}
-  #v_preview .pv-post.pv-me{border-left:6px solid var(--bk)}
-  #v_preview .pv-post.pv-co{border-left:6px solid var(--mg)}
-  #v_preview .pv-post.pv-world{background:#e7e2d5;border-style:dashed}
-  #v_preview .pv-post.pv-how{background:#fff7da;border-left:6px solid var(--ylw)}
-  #v_preview .pv-post.pv-how .pv-ptxt{white-space:pre-line}
-  #v_preview .t-how{background:var(--ylw)}
-  #v_preview .pv-world .pv-ptxt{font-style:italic;color:#3a362e}
-  #v_preview .pv-who{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
-  #v_preview .pv-ptxt{font-size:12px;line-height:1.35;color:#111}
-  #v_preview .pv-pmeta{display:flex;gap:6px;align-items:center;margin-top:5px}
-  #v_preview .pv-tag{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:1px 4px;border:1.5px solid var(--bk);color:#111;flex-shrink:0}
-  #v_preview .t-post{background:var(--ylw)} #v_preview .t-raise{background:#fff} #v_preview .t-pivot{background:var(--mg);color:#fff}
-  #v_preview .t-sale{background:var(--grn);color:#fff} #v_preview .t-news{background:#e8e4d8} #v_preview .t-boss{background:var(--rd);color:#fff}
-  #v_preview .pv-gain{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--grn);margin-left:auto}
-  #v_preview .pv-nextw{padding:5px 13px 6px;border-top:3px solid var(--bk);background:var(--paper)}
-  #v_preview .pv-next{width:100%;border:3px solid var(--bk);background:var(--bk);color:var(--paper);font-weight:800;
-    text-transform:uppercase;letter-spacing:1px;font-size:13px;padding:9px;box-shadow:4px 4px 0 var(--mut);cursor:pointer}
-  #v_preview .pv-next.disabled{background:#fff;color:#bdb8ac;box-shadow:none;cursor:default}
-  #v_preview .pv-thumb{display:flex;border-top:3px solid var(--bk);background:#fff}
-  #v_preview .pv-act{flex:1;padding:6px 2px 5px;text-align:center;border-right:2px solid var(--bk);background:#fff;cursor:pointer}
-  #v_preview .pv-act:last-child{border-right:0}
-  #v_preview .pv-act.pivot{background:#fbe6f6} #v_preview .pv-act.ship{background:#fff7da}
-  #v_preview .pv-act.off{opacity:.32}
-  #v_preview .pv-act .ic{font-size:15px;font-weight:800;line-height:1;color:#111}
-  #v_preview .pv-act .lab{font-size:10px;font-weight:800;text-transform:uppercase;margin-top:1px;letter-spacing:.3px;color:#111}
-  #v_preview .pv-act .cost{font-family:var(--mono);font-size:9px;color:var(--mut);font-weight:700}
-  #v_preview .pv-scrim{position:absolute;inset:0;background:rgba(17,17,17,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:8}
-  #v_preview .pv-scrim.on{opacity:1;pointer-events:auto}
-  #v_preview .pv-sheet{position:absolute;left:8px;right:8px;bottom:16px;background:var(--paper);border:3px solid var(--bk);box-shadow:5px 5px 0 var(--bk);
-    transform:translateY(140%);transition:transform .22s cubic-bezier(.2,.8,.2,1);max-height:76%;display:flex;flex-direction:column;z-index:9}
-  #v_preview .pv-sheet.on{transform:translateY(0)}
-  #v_preview .pv-sheet{overflow:hidden}
-  #v_preview .pv-shd{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:3px solid var(--bk);background:var(--ylw)}
-  #v_preview .pv-stitle{font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:#111}
-  #v_preview .pv-sx{margin-left:auto;flex-shrink:0;border:2px solid var(--bk);background:#fff;color:#111;width:40px;height:40px;font-weight:800;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  #v_preview .pv-sbody{padding:11px 13px;overflow-y:auto}
-  #v_preview .pv-hint{font-size:11px;color:var(--mut);margin:0 0 9px;line-height:1.4}
-  #v_preview .pv-bosskind{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--mg);margin:0 0 7px}
-  #v_preview .pv-choice{display:block;width:100%;text-align:left;border:2px solid var(--bk);background:#fff;padding:9px 10px;margin-bottom:8px;box-shadow:3px 3px 0 var(--bk);cursor:pointer}
-  #v_preview .pv-choice:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bk)}
-  #v_preview .pv-choice.off{opacity:.4;box-shadow:none;cursor:default}
-  #v_preview .pv-ct{font-size:12px;line-height:1.35;color:#111}
-  #v_preview .pv-cmeta{display:flex;align-items:center;gap:6px;margin-top:5px}
-  #v_preview .pv-proj{font-family:var(--mono);font-weight:800;font-size:11px;color:var(--grn);margin-left:auto}
-  #v_preview .pv-cnote{font-size:10px;color:var(--mut)}
-  #v_preview .pv-end{position:absolute;inset:0;background:rgba(244,241,233,.96);z-index:10;display:flex;align-items:center;justify-content:center;padding:18px}
-  #v_preview .pv-adband{flex-shrink:0;height:54px;margin:4px 0 0;border:2px solid var(--bk);background:#fff;display:flex;align-items:center;gap:8px;padding:0 8px;overflow:hidden}
-  #v_preview .pv-adlogo{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;border:2px solid var(--bk)}
-  #v_preview .pv-adtxt{flex:1;min-width:0;font-size:11px;line-height:1.35;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #v_preview .pv-adtxt b{font-weight:800}
-  #v_preview .pv-adtag{font-size:9px;font-weight:800;text-transform:uppercase;background:#ddd;color:#444;padding:0 4px;border:1px solid #999}
-  #v_preview .pv-adcta{flex-shrink:0;font-size:11px;font-weight:800;text-transform:uppercase;border:2px solid var(--bk);background:var(--ylw);color:#111;padding:6px 10px}
-  #v_preview .pv-promo{border-left:6px solid var(--gld);background:#fbf7ec}
-  #v_preview .pv-promobar{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-  #v_preview .pv-promotag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;background:var(--gld);color:#fff;padding:2px 5px;border:2px solid var(--bk)}
-  #v_preview .pv-adchoices{font-size:9px;color:var(--mut);margin-left:auto}
-  #v_preview .pv-cta{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;border:2px solid var(--bk);background:#fff;color:#111;padding:4px 9px;box-shadow:2px 2px 0 var(--bk);cursor:pointer}
-  #v_preview .pv-act.pulse{animation:pvpulse 1.1s ease-in-out infinite}
-  @keyframes pvpulse{0%,100%{background:#fff}50%{background:var(--ylw)}}
-  #v_preview .pv-hero.compact .pv-tag2,#v_preview .pv-hero.compact .pv-status,#v_preview .pv-hero.compact .pv-stats,#v_preview .pv-hero.compact .pv-rww{display:none}
-  #v_preview .pv-hero.compact .pv-vbig{font-size:21px}
-  #v_preview .pv-hero.compact{padding-bottom:8px}
-  #v_preview .pv-meter{border:2px solid var(--bk);padding:8px 10px;margin:0 0 10px;background:#fff}
-  #v_preview .pv-meter.ok{border-left:6px solid var(--grn)} #v_preview .pv-meter.warn{border-left:6px solid var(--rd)}
-  #v_preview .pv-metert{font-size:11px;font-weight:800;margin-bottom:5px}
-  #v_preview .pv-meterr{font-size:11px;color:#333;line-height:1.55}
-  #v_preview .pv-metern{font-size:10px;color:var(--mut);margin-top:4px;font-style:italic}
-  </style>
-  <div id="pv_skins" class="pvskins"></div>
-  <div class="pvwrap"><div class="pvph">
-    <div class="pv-hero">
-      <div class="pv-r pv-bw">
-        <div class="pv-r" style="min-width:0">
-          <span class="pv-co" id="pv_name"></span>
-          <button class="pv-rebrand" id="pv_reroll">Rebrand</button>
-        </div>
-        <span class="pv-revpill" id="pv_rev">REVENUE $0</span>
-      </div>
-      <div class="pv-tag2" id="pv_tagline"></div>
-      <div class="pv-status" id="pv_status"></div>
-      <div class="pv-vrow">
-        <div class="pv-vbig" id="pv_val">$0</div>
-        <div class="pv-goalw">
-          <div class="pv-goalbar"><div class="pv-goalfill" id="pv_goalfill"></div><div class="pv-gtick" style="left:40%"></div><div class="pv-gtick" style="left:80%"></div></div>
-        </div>
-        <span style="font-size:15px;flex-shrink:0">🦄</span>
-      </div>
-      <div class="pv-stats">
-        <div class="pv-st"><div class="k">Hype</div><div class="v" id="pv_hype">0</div></div>
-        <div class="pv-st"><div class="k">Cash</div><div class="v" id="pv_fund">$0</div></div>
-        <div class="pv-st" id="pv_more" style="cursor:pointer"><div class="k">Financials</div><div class="v">ⓘ</div></div>
-      </div>
-      <div class="pv-rww">
-        <div class="pv-rwlab"><span id="pv_rwlabel">Runway</span><span id="pv_rw"></span></div>
-        <div class="pv-rwbar"><div class="pv-rwfill" id="pv_rwbar"></div><div id="pv_rwburn"></div></div>
-      </div>
-    </div>
-    <div class="pv-month">
-      <span class="pv-mlab" id="pv_month">Month 1 / 12</span>
-      <span class="pv-ap" id="pv_ap" style="margin-left:auto"></span>
-      ${adv?`<button class="pv-restart" id="pvskins" style="margin-left:6px" title="Skins">🎨</button>`:""}
-      <button class="pv-restart" id="pvrestart" style="margin-left:6px" title="New random run">↻</button>
-    </div>
-    <div class="pv-buzz">
-      <div class="pv-buzztop"><span>Your business is <b id="pv_buzzname">—</b></span>
-        <span style="white-space:nowrap">fresh <span class="pv-fresh" id="pv_freshpct">100%</span> <span id="pv_nudge" style="color:var(--rd);font-weight:800"></span><span id="pv_cycle" style="font-weight:800;margin-left:4px"></span></span></div>
-      <div class="pv-buzzfl" id="pv_buzzflavor"></div></div>
-    <div class="pv-feedhd">Timeline</div>
-    <div class="pv-feed" id="pv_feed"></div>
-    <div class="pv-nextw"><button class="pv-next disabled" id="pv_next">Next month →</button></div>
-    <div class="pv-thumb">
-      <button class="pv-act" id="pv_act_post"><div class="ic">①</div><div class="lab">Post</div><div class="cost">1 AP</div></button>
-      <button class="pv-act" id="pv_act_raise"><div class="ic">②</div><div class="lab">Raise</div><div class="cost" id="pv_raisecost">1 AP</div></button>
-      <button class="pv-act pivot" id="pv_act_pivot"><div class="ic">③</div><div class="lab">Pivot</div><div class="cost" id="pv_pivotap">1 AP</div></button>
-      <button class="pv-act ship" id="pv_act_ship"><div class="ic">④</div><div class="lab">Ship</div><div class="cost">1 AP</div></button>
-    </div>
-    ${ADS.banner?`<div class="pv-adband" id="pv_adband"></div>`:""}
-    <div class="pv-scrim" id="pv_scrim"></div>
-    <div class="pv-sheet" id="pv_sheet">
-      <div class="pv-shd"><span class="pv-stitle" id="pv_sheettitle"></span><button class="pv-sx" id="pv_sheetx">✕</button></div>
-      <div class="pv-sbody" id="pv_sheetbody"></div>
-    </div>
-    <div id="pv_end"></div>
-  </div></div>`;
-  const g=id=>document.getElementById(id);
-  g("pvrestart").onclick=()=>{if(P&&!P.over&&!confirm("Restart? You'll lose this run."))return;newRun(true);};
-  const skEl=g("pvskins");if(skEl)skEl.onclick=()=>openSkinsSheet();
-  const moEl=g("pv_more");if(moEl)moEl.onclick=()=>openSheet("stats");
-  // ⛶ fullscreen-nupp eemaldatud (Siim 11.06): iOS Safari ei toeta lehe fullscreen-API-t ja installitud PWA-s pole vaja
-  g("pv_next").onclick=()=>{if(P&&!P.over&&P.ap<=0)nextMonth();else if(P&&P.over&&P.endDismissed){P.endDismissed=false;pvRender();}}; // AP-lukk; runi lõpus "Show results"
-  g("pv_reroll").onclick=()=>{ // puhas flavor — hype'i EI anna (oli "optimaalne chore": tasuta hype 1×/kuu)
-    P.name=genName();P.tagline=pick(FL().taglines);
-    if(!P.rebrandedMo&&!P.over){P.rebrandedMo=true;feedPush({text:"Rebranded to "+P.name+". The new logo is a gradient. Engagement unchanged.",h:0,label:"post"});}
-    popText("Rebranded.","var(--mag)");
-    pvRender();
-  };
-  g("pv_act_post").onclick=()=>openSheet("post");
-  g("pv_act_ship").onclick=()=>openSheet("ship");
-  g("pv_act_raise").onclick=()=>openSheet("raise");
-  g("pv_act_pivot").onclick=()=>openSheet("pivot");
-  g("pv_scrim").onclick=closeSheet;
-  g("pv_sheetx").onclick=closeSheet;
-  const feedEl=g("pv_feed");if(feedEl)feedEl.onscroll=()=>{const hero=document.querySelector("#v_preview .pv-hero");if(hero)hero.classList.toggle("compact",feedEl.scrollTop>16);};
-  applyTheme(curTheme);
-  if(!valAnimRunning){valAnimRunning=true;requestAnimationFrame(animVal);}
-}
-let pvSheet=null,pvBoss=null;
-function closeSheet(){if(pvSheet==="boss")return;_closeSheetNow();} // boss/archetype/level-up are mandatory — can't be dismissed
-function _closeSheetNow(){pvSheet=null;pvBoss=null;const s=document.getElementById("pv_sheet"),sc=document.getElementById("pv_scrim"),xb=document.getElementById("pv_sheetx");if(s)s.classList.remove("on");if(sc)sc.classList.remove("on");if(xb)xb.style.display="";}
-function openSheet(key){pvSheet=key;renderSheetBody();const s=document.getElementById("pv_sheet"),sc=document.getElementById("pv_scrim"),xb=document.getElementById("pv_sheetx");if(xb)xb.style.display="";if(s)s.classList.add("on");if(sc)sc.classList.add("on");}
-function openSkinsSheet(){
-  // cosmetic skins as a bottom-sheet (mobile has no Studio skins bar). Dismissable.
-  const body=document.getElementById("pv_sheetbody"),ttl=document.getElementById("pv_sheettitle"),xb=document.getElementById("pv_sheetx");
-  if(!body)return;
-  pvSheet="skins";if(xb)xb.style.display="";ttl.textContent="Skins";
-  const cred=P?(P.founderCred||0):0;
-  let h=`<p class="pv-hint">Cosmetic only. Unlock with Founder Cred (earned by exits &amp; big runs). You have ${cred}.</p>`;
-  THEMES.forEach(t=>{const un=cred>=t.cred;h+=`<button class="pv-choice ${un?'':'off'}" ${un?`data-skin="${t.id}"`:''}><div class="pv-ct">${(t.name||'').replace(/</g,'&lt;')}${curTheme===t.id?' ✓':''}</div><div class="pv-cmeta"><span class="pv-cnote">${un?'unlocked':'needs '+t.cred+' cred'}</span></div></button>`;});
-  body.innerHTML=h;
-  body.querySelectorAll("[data-skin]").forEach(b=>b.onclick=()=>{applyTheme(b.dataset.skin);openSkinsSheet();});
-  const s=document.getElementById("pv_sheet"),sc=document.getElementById("pv_scrim");
-  if(s)s.classList.add("on");if(sc)sc.classList.add("on");
-}
-function feedRowHTML(f){
-  const lab=(f.label||"").toLowerCase();let cls="t-news";
-  if(lab.indexOf("post")>=0||lab==="ratio")cls="t-post";
-  else if(lab.indexOf("pivot")>=0)cls="t-pivot";
-  else if(lab.indexOf("raise")>=0||lab.indexOf("buyout")>=0)cls="t-raise";
-  else if(lab.indexOf("sale")>=0)cls="t-sale";
-  else if(lab.indexOf("boss")>=0||lab.indexOf("scandal")>=0||lab.indexOf("crisis")>=0)cls="t-boss";
-  let row,who;
-  if(lab==="how to play"){row="pv-how";who="How to play";cls="t-how";}
-  else if(/(post|ratio|raise|hire|pivot|ship|buyout|founder)/.test(lab)){row="pv-me";who="You";}
-  else if(/(event|crisis|perk|boss|scandal|sale|milestone)/.test(lab)){row="pv-co";who="Your startup";}
-  else {row="pv-world";who="In the world";}
-  const gain=f.h?`<span class="pv-gain">+${fmt(f.h)}</span>`:"";
-  const sub=f.sub?`<div class="pv-ptxt" style="font-style:italic;color:var(--mut);margin-top:2px">${(f.sub||"").replace(/</g,'&lt;')}</div>`:"";
-  // ÜKS metarida kahe asemel (kes · silt · gain) — Siimu tähelepanek 11.06: kaks infovälja raiskasid ~20px/kaart
-  return `<div class="pv-post ${row}"><div class="pv-who"><span>${who}</span><span class="pv-tag ${cls}">${(f.label||"").replace(/</g,'&lt;')}</span>${gain}</div><div class="pv-ptxt">${(f.text||"").replace(/</g,'&lt;')}</div>${sub}</div>`;
-}
-function renderSheetBody(){
-  if(!pvSheet||pvSheet==="boss"||pvSheet==="offer"||pvSheet==="skins")return;const body=document.getElementById("pv_sheetbody"),ttl=document.getElementById("pv_sheettitle");
-  if(!body)return;const act=canAct();let h="",title="";
-  if(pvSheet==="post"){
-    title="Post";
-    const rcPct=Math.round(ratioChanceNow()*100);
-    h=`<p class="pv-hint">One safe, one spicy. The spicy one hits harder — and can get ratio'd.${(P.postsThisMo||0)>0?` <b style="color:var(--rd)">Audience fatigue: ratio risk is up to ${rcPct}% this month.</b>`:""}</p>`;
-    (P.hand||[]).forEach((post,i)=>{
-      const proj=(B().clickHype||1500)*(post.hype||1)*buzzMult()*credMult()*(P.pivotHypeMod||1)*(P.archPostMod||1);
-      const rk=(post.hype||1)>=(B().ratioRiskAbove||1.5);
-      h+=`<button class="pv-choice ${act?'':'off'}" data-act="post" data-i="${i}"><div class="pv-ct">${(post.text||'').replace(/\{buzz\}/g,curBuzz().name).replace(/</g,'&lt;')}</div><div class="pv-cmeta">${post.angle?`<span class="pv-cnote">${post.angle}${rk?` · ⚠ ${rcPct}% ratio risk`:""}</span>`:""}<span class="pv-proj">+${fmt(proj)}</span></div></button>`;
-    });
-    if(!(P.hand||[]).length)h+=`<p class="pv-hint">Nothing left to post — the discourse is exhausted.</p>`;
-  } else if(pvSheet==="ship"){
-    title="Ship";
-    h=`<p class="pv-hint">Pick what to build. Tiny hype — but a real sale doubles your valuation (and may attract a buyer).</p>`;
-    (P.shipHand||[]).forEach((it,i)=>{h+=`<button class="pv-choice ${act?'':'off'}" data-act="ship" data-i="${i}"><div class="pv-ct">Ship: ${(it||'').replace(/</g,'&lt;')}</div></button>`;});
-    if(!(P.shipHand||[]).length)h+=`<p class="pv-hint">Nothing left to ship — you have built everything imaginable.</p>`;
-  } else if(pvSheet==="stats"){
-    title="The real numbers";
-    const rw=runwayMo();let teamBurn=0;S.upgrades.forEach(u=>teamBurn+=(u.burn||0)*(P.owned[u.id]||0));teamBurn*=(B().hireBurnMult||1)*(P.burnMult||1);
-    const ovh=valuation()*(B().overheadBurnPct||0)*(P.burnMult||1);
-    const rows=[
-      ["Valuation","$"+fmt(valuation())],
-      ["Hype",fmt(P.hype)],
-      ["Cash in the bank","$"+fmt(P.funding)],
-      ["Burn / month","$"+fmt(burnMo())],
-      ["… of which team","$"+fmt(teamBurn)],
-      ["… of which looking big","$"+fmt(ovh)],
-      ["Runway",rw===Infinity?"∞":fmt(rw)+" months"],
-      ["You own",Math.round(P.ownership||100)+"%"],
-      ["Your pocket (secondaries)","$"+fmt(P.personalCash||0)],
-      ["Round",roundName()],
-      ["Real sales",(P.sales||0)+""],
-      ["Revenue (official)","$0"]
-    ];
-    if(P.nemesis)rows.push(["Rival: "+P.nemesis.name,P.nemesis.won?"$1B 🙃":"$"+fmt(P.nemesis.val)]);
-    rows.push(["📁 Paper trail",ptGrade()+" ("+Math.round(P.paperTrail||0)+")"]);
-    rows.push(["🏢 HQ",hqName()]); // flavor — kolis hero'st siia (11.06, ruum)
-    const rrow=r=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px dashed #c9c4b6"><span style="color:var(--mut);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px">${r[0]}</span><span style="font-family:var(--mono);font-weight:700;color:#111">${r[1]}</span></div>`;
-    h=`<p class="pv-hint">The numbers investors don't ask about.</p>`+rows.map(rrow).join("");
-    const career=[
-      ["Runs",META.plays||0],["Exits",META.exits||0],["Acquihires (lol)",META.acquihires||0],
-      ["Raised, all time","$"+fmt(META.raisedAll||0)],
-      ["Rounds closed, all time",META.roundsAll||0],
-      ["Best valuation","$"+fmt(META.bestVal||0)],
-      ["Fastest win",META.fastestWin?(META.fastestWin+" mo"):"—"],
-      ["Revenue, all time","$0"]
-    ];
-    h+=`<div class="pv-bosskind" style="margin:12px 0 4px">📊 The $0 Club — career</div>`+career.map(rrow).join("");
-    h+=`<button class="pv-choice" data-mute="1" style="margin-top:10px"><div class="pv-ct">${META.muted?"🔇 Sound is off — tap to enable":"🔊 Sound is on — tap to mute"}</div></button>`;
-  } else if(pvSheet==="raise"){
-    title="Raise";
-    const rn=roundName(),thr=raiseThreshold();
-    if(P.hype<thr){
-      h=`<p class="pv-hint">Raise <b>${rn}</b> needs ${fmt(thr)} hype — you have ${fmt(P.hype)}. Post more first.</p>`;
-    } else {
-      const base=raiseLump()*(P.archRaiseMod||1),dil=Math.round((B().dilutionPerRound||0.12)*100),cash=valuation()*0.04;
-      h=`<p class="pv-hint">Closing <b>${rn}</b> dilutes your stake. You own ${Math.round(P.ownership||100)}% now. Costs 1 AP.</p>`;
-      h+=`<button class="pv-choice ${act?'':'off'}" data-raise="standard"><div class="pv-ct">Standard round</div><div class="pv-cmeta"><span class="pv-cnote">−${dil}% your stake</span><span class="pv-proj">+$${fmt(base)}</span></div></button>`;
-      h+=`<button class="pv-choice ${act?'':'off'}" data-raise="secondary"><div class="pv-ct">Take a secondary — cash out some of YOUR shares now</div><div class="pv-cmeta"><span class="pv-cnote">−${Math.round(dil*1.7)}% stake · +$${fmt(cash)} to you, kept whatever happens</span><span class="pv-proj">+$${fmt(base*0.85)}</span></div></button>`;
-      h+=`<button class="pv-choice ${act?'':'off'}" data-raise="friendly"><div class="pv-ct">Founder-friendly / super-voting — keep your stake</div><div class="pv-cmeta"><span class="pv-cnote">−${Math.round(dil*0.4)}% stake</span><span class="pv-proj">+$${fmt(base*0.6)}</span></div></button>`;
-    }
-  } else if(pvSheet==="pivot"){
-    title="Pivot";
-    const nb=S.buzzwords[P.buzz+1],pvAP=pivotAPCost(),pvCap=B().maxPivotPerMonth||99;
-    if(!nb){h=`<p class="pv-hint">You're at the top of the buzzword ladder — nowhere hotter to go.</p>`;}
-    else if(P.round<=P.buzz){h=`<p class="pv-hint">No traction yet — you can't claim <b>${nb.name}</b> without raising the next round first. Raise, then pivot.</p>`;}
-    else if((P.pvThisMo||0)>=pvCap){h=`<p class="pv-hint">Already pivoted this month. Let the narrative breathe — try next month.</p>`;}
-    else if(P.ap<pvAP){h=`<p class="pv-hint">A pivot costs ${pvAP} AP — you don't have enough left this month.</p>`;}
-    else{
-      h=`<p class="pv-hint">Jump to a hotter buzzword. Costs ${pvAP} AP + ${Math.round((B().pivotTaxPct||0.15)*(P.archPivotTaxMod!=null?P.archPivotTaxMod:1)*100)}% of funding, and resets narrative freshness to 100%.</p>`;
-      h+=`<button class="pv-choice" data-pivot="1"><div class="pv-ct">Pivot → <b>${nb.name}</b> <span class="pv-cnote">(×${nb.mult})</span></div><div class="pv-cmeta"><span class="pv-cnote">${(nb.flavor||'').replace(/</g,'&lt;')}</span></div></button>`;
-    }
-  }
-  ttl.textContent=title;body.innerHTML=h;
-  if(!act){const n=document.createElement("div");n.className="pv-hint";n.style.marginTop="4px";n.textContent="No action points left — advance to next month.";body.appendChild(n);}
-  body.querySelectorAll("[data-act]").forEach(el=>{el.onclick=()=>{
-    if(!canAct())return;const k=el.dataset.act,i=+el.dataset.i,id=el.dataset.id;
-    closeSheet();
-    if(k==="post")doPost(P.hand[i]);
-    else if(k==="ship")ship(P.shipHand[i]);
-  };});
-  body.querySelectorAll("[data-raise]").forEach(el=>{el.onclick=()=>{if(!canRaiseNow())return;const k=el.dataset.raise;closeSheet();applyRaise(k);};});
-  const pvb=body.querySelector("[data-pivot]");if(pvb)pvb.onclick=()=>{closeSheet();pivot();};
-  const mu=body.querySelector("[data-mute]");if(mu)mu.onclick=()=>{META.muted=!META.muted;saveMeta();renderSheetBody();};
-}
-function pvRender(){
-  if(!P||!document.getElementById("pv_val"))return;
-  const g=id=>document.getElementById(id);
-  g("pv_month").textContent="Month "+P.month+" / "+(B().totalMonths||10);
-  const apMax=(B().apPerMonth||3)+(P.apBonus||0);let dots="";for(let i=0;i<apMax;i++)dots+=i<P.ap?"●":"○";
-  g("pv_ap").textContent=dots;
-  g("pv_name").textContent=P.name||"";
-  g("pv_tagline").textContent=(P.tagline||"").replace(/\{buzz\}/g,curBuzz().name);
-  const st=g("pv_status");if(st)st.innerHTML='<span class="pv-chip">👤 '+((P.archName||"The Dropout").replace(/</g,'&lt;'))+'</span><span class="pv-chip lvl">🏆 '+founderLevel()+'</span><span class="pv-chip">⭐ '+(META.founderCred||0)+' cred</span>';
-  g("pv_hype").textContent=fmt(P.hype);
-  g("pv_fund").textContent="$"+fmt(P.funding);
-  g("pv_rev").textContent="REVENUE $0"; // the joke: officially $0 forever, no matter how many "real sales" happen
-  // Runway-riba = KASSA, millest punane tükk on SELLE kuu burn (Siim 12.06: "roheline riba, aga down-round" oli segadus —
-  // burn võetakse kuu lõpus ja kasvab valuationiga). Kui burn ≥ kassa → kogu riba punane + "Down-round incoming".
-  const rw=runwayMo(),burnNow=burnMo();
-  const drIncoming=P.funding<=0||burnNow>=P.funding;
-  g("pv_rw").textContent=(rw===Infinity?"∞":fmt(rw)+" mo")+" · burn $"+fmt(burnNow)+"/mo";
-  const lbl=g("pv_rwlabel");if(lbl){lbl.textContent=drIncoming?"⚠ Down-round incoming":"Runway";lbl.style.color=drIncoming?"var(--rd)":"";}
-  const burnPct=drIncoming?100:Math.min(100,burnNow/Math.max(P.funding,1)*100);
-  const rb=g("pv_rwburn");if(rb)rb.style.width=burnPct+"%";
-  g("pv_rwbar").style.width=Math.max(0,100-burnPct)+"%";
-  g("pv_rwbar").style.background=rw<5?"#d9a400":"var(--grn)";
-  updateGoalBar();
-  const cb=curBuzz();
-  g("pv_buzzname").textContent=cb.name;
-  g("pv_buzzflavor").textContent="“"+(cb.flavor||"")+"”";
-  const fr=Math.round(P.freshness);
-  g("pv_freshpct").textContent=fr+"%";
-  g("pv_freshpct").style.color=fr<35?"var(--rd)":fr<70?"#9a6b00":"#111";
-  const nd=g("pv_nudge");if(nd){nd.textContent=fr<35?"⚠ pivot now":"";nd.style.cssText=fr<35?"background:var(--rd);color:#fff;padding:1px 5px;border:2px solid #111;font-weight:800":"";}
-  const nb=S.buzzwords[P.buzz+1];
-  const pvAP=pivotAPCost(), pvCap=B().maxPivotPerMonth||99, pivotedThisMo=(P.pvThisMo||0)>=pvCap;
-  g("pv_pivotap").textContent=pvAP+" AP";
-  const okPivot=nb&&P.round>P.buzz&&!P.over&&P.ap>=pvAP&&!pivotedThisMo;
-  const canRaise=!P.over&&P.ap>0&&P.hype>=raiseThreshold();
-  const setOff=(id,on)=>{const el=g(id);if(el)el.classList.toggle("off",!on);};
-  setOff("pv_act_post",canAct());
-  setOff("pv_act_ship",canAct());
-  setOff("pv_act_raise",canRaise);
-  setOff("pv_act_pivot",okPivot);
-  // dimmed buttons explain WHY (instead of a dead "1 AP") — kills the "is it broken?" confusion
-  const setCost=(id,txt)=>{const el=g(id);if(el)el.textContent=txt;};
-  setCost("pv_raisecost",(P.over||P.ap<=0)?"1 AP":(P.hype>=raiseThreshold()?"1 AP":"need hype"));
-  g("pv_pivotap").textContent=okPivot?(pvAP+" AP"):(!nb?"maxed":(P.round<=P.buzz?"raise 1st":(pivotedThisMo?"1×/mo":pvAP+" AP")));
-  const postBtn=g("pv_act_post");if(postBtn)postBtn.classList.toggle("pulse",(META.plays||0)<=2&&P.month===1&&P.ap===apMax&&!P.over);
-  const cyc=g("pv_cycle");if(cyc){if(!advancedUnlocked()){cyc.textContent="";}else{const s=(P.sincePivot==null)?99:P.sincePivot;cyc.textContent=(s>=99)?"":(s<=0?"🔥 peak":(s>=3?"📉 trough":""));cyc.style.color=s<=0?"var(--grn)":"var(--mut)";}}
-  const ab=g("pv_adband");if(ab)ab.innerHTML=bannerHTML(BANNERS[((P.month||1)-1)%BANNERS.length]);
-  const feed=g("pv_feed");
-  if(feed)feed.innerHTML=feedHTMLWithAds(P.feed||[])||`<div class="pv-empty">Take an action — it shows up here.</div>`;
-  const sk=g("pv_skins");
-  if(sk){
-    sk.innerHTML="<span>Skins (Founder Cred: "+(P.founderCred||0)+"):</span> "+THEMES.map(t=>{const un=(P.founderCred||0)>=t.cred;return `<button class="skinbtn ${curTheme===t.id?'on':''} ${un?'':'lock'}" data-skin="${t.id}" ${un?'':'disabled'}>${un?'':'🔒 '}${t.name}${t.cred>0?' ('+t.cred+')':''}</button>`}).join(" ")
-      + (IN_APP?"":` <a class="skinbtn" href="${PLAY_URL}&amp;referrer=utm_source%3Dweb%26utm_medium%3Dtopbar" target="_blank" rel="noopener" style="text-decoration:none;margin-left:10px">▶ Also on Google Play</a>`);
-    sk.querySelectorAll("[data-skin]").forEach(b=>b.onclick=()=>{if(!b.disabled){applyTheme(b.dataset.skin);pvRender();}});
-  }
-  const nbtn=g("pv_next");
-  if(P.over&&P.endDismissed){nbtn.className="pv-next";nbtn.textContent="Show results →";} // lõpukaart X-iga suletud — saab tagasi
-  else if(P.over){nbtn.className="pv-next disabled";nbtn.textContent="Run over";}
-  else if(P.ap>0){nbtn.className="pv-next disabled";nbtn.textContent="Next month →";} // lukus kuni AP kulutatud (Siim 11.06)
-  else {nbtn.className="pv-next";nbtn.textContent="Next month →";}
-  if(pvSheet&&pvSheet!=="boss"&&pvSheet!=="offer"&&!P.over)renderSheetBody(); else if(P.over)closeSheet(); // boss/offer sheets render themselves — don't let pvRender wipe them
-  const end=g("pv_end");
-  if(P.over&&P.endDismissed){end.className="";end.innerHTML="";} // X-iga suletud: feed jääb sirvitavaks (Siim 12.06)
-  else if(P.over){
-    const win=P.over==="win";
-    const acq=P.over==="acquihire";
-    const bought=win&&P.exitType==="buyout";
-    const ttl=acq?'🤝 ACQUIHIRED':(bought?'🤝 ACQUIRED':(win?'🦄 UNICORN!':'⏳ YEAR OVER'));
-    const accent=win?'var(--grn)':(acq?'var(--gld)':'var(--rd)');
-    const sub=acq?('Sold for $'+fmt(valuation())+' in month '+P.month+'. A unicorn this was not.'):(bought?('Acquired for $'+fmt(valuation())+' in month '+P.month+'.'):(win?('Hit $1B in '+P.month+' months.'):('Peaked at $'+fmt(P.peakVal||valuation())+(P.peakMonth?' in month '+P.peakMonth:'')+'. Still a '+stageName()+', not a unicorn.')));
-    // ÜKS lõpukaart (Siim 11.06): jagamiskaardi "kollane" stiil, pressiteade eemaldatud.
-    const recap=[];
-    recap.push(['Best post', P.bestPost?('“'+P.bestPost.slice(0,60)+(P.bestPost.length>60?'…':'')+'”'):'—']);
-    if((P.usedShips||[]).length)recap.push(['Dumbest thing you shipped', (pick(P.usedShips)||'').replace(/[.\s]+$/,'')]);
-    recap.push(['Total raised', '$'+fmt(P.totalRaised||0)]);
-    recap.push(['Real sales', (P.sales||0)+'  ·  revenue $'+(P.sales?fmt(P.sales*47):'0')]);
-    if(P.nemesis)recap.push(['Your rival', P.nemesis.name+(P.nemesis.won?' — hit $1B first 🙃':' — $'+fmt(P.nemesis.val))]);
-    recap.push(['Paper trail', ptGrade()]);
-    const credLine=(P.lastCred>0)?('+'+P.lastCred+' Founder Cred → total '+(META.founderCred||0)):(win?'':'No Founder Cred this time — peak under $10M.');
-    const pkt=pocketMoney(),paper=paperStake(),showPaper=pkt<paper*0.99;
-    const bandBg=win?'var(--grn)':(acq?'var(--gld)':'var(--rd)');
-    end.className="pv-end";
-    end.innerHTML=`<div style="width:100%;max-width:340px;border:3px solid var(--bk);background:#fff;box-shadow:6px 6px 0 var(--bk);max-height:96%;overflow-y:auto">
-      <div style="position:relative;background:${bandBg};color:#fff;text-align:center;font-size:23px;font-weight:800;text-transform:uppercase;padding:11px 44px;border-bottom:3px solid var(--bk)">${ttl}<button id="pv_endx" style="position:absolute;right:7px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:2px solid var(--bk);background:#fff;color:#111;font-weight:800;font-size:15px;line-height:1;cursor:pointer">✕</button></div>
-      <div style="padding:10px 14px 0;text-align:center">
-        <div style="font-size:17px;font-weight:800;color:#111">${(P.name||"").replace(/</g,'&lt;')}</div>
-        <div style="font-size:10.5px;font-style:italic;color:var(--mut);margin-top:1px">${((P.tagline||"").replace(/\{buzz\}/g,curBuzz().name)).replace(/</g,'&lt;')}</div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-top:5px;color:#111">Founder: ${(P.archName||"The Dropout").replace(/</g,'&lt;')}</div>
-        <div style="font-size:9.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-top:8px">Peak valuation</div>
-        <div style="font-family:var(--mono);font-weight:800;font-size:38px;line-height:1;letter-spacing:-1px;color:#111">$${fmt(P.peakVal||valuation())}</div>
-        <div style="display:inline-block;background:var(--rd);color:#fff;border:2px solid var(--bk);font-family:var(--mono);font-weight:700;font-size:11px;padding:2px 8px;margin-top:6px">REVENUE: $0</div>
-      </div>
-      <div style="display:flex;border:2px solid var(--bk);margin:10px 14px 0">${[["BUZZWORD",curBuzz().name],["MONTH",(win?P.month:(B().totalMonths||12))+" / "+(B().totalMonths||12)],["YOU OWN",Math.round(P.ownership||100)+"%"]].map((s,i)=>`<div style="flex:1;padding:5px 3px;text-align:center;${i<2?'border-right:2px solid var(--bk);':''}min-width:0"><div style="font-size:8.5px;font-weight:800;letter-spacing:.4px;color:var(--mut)">${s[0]}</div><div style="font-family:var(--mono);font-weight:700;font-size:11.5px;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(s[1]||'').toString().replace(/</g,'&lt;')}</div></div>`).join('')}</div>
-      <div style="text-align:center;margin:9px 14px 0;font-size:13px;font-weight:800;color:var(--gld)">In your pocket: $${fmt(pkt)}</div>
-      ${showPaper?`<div style="text-align:center;margin:1px 14px 0;font-size:10px;color:var(--mut);font-weight:700">your ${Math.round(P.ownership||100)}% stake ($${fmt(paper)}) is paper${win?' — see you after the lock-up':''}</div>`:''}
-      <div style="border:2px solid var(--bk);background:var(--paper);padding:8px 10px;margin:9px 14px 0">${recap.map(r=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:2px 0"><span style="color:#6b6760;font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.4px;flex-shrink:0">${r[0]}</span><span style="color:#111;text-align:right">${(r[1]||'').toString().replace(/</g,'&lt;')}</span></div>`).join('')}</div>
-      ${credLine?`<div style="text-align:center;font-size:10.5px;font-weight:700;color:#111;margin:8px 14px 0">${credLine}</div>`:''}
-      ${(()=>{const epi=[P.epilogue,ptEpilogue(win)].filter(Boolean).join(" ");return epi?`<div style="border:2px solid var(--bk);background:#fff7da;padding:8px 10px;margin:8px 14px 0;font-size:11px;line-height:1.45;font-style:italic;color:#111">${epi.replace(/</g,'&lt;')}</div>`:'';})()}
-      <div style="display:flex;gap:8px;margin:10px 14px 0"><button style="flex:1;border:2px solid var(--bk);background:var(--ylw);color:#111;font-weight:800;text-transform:uppercase;font-size:11px;padding:9px;cursor:pointer" id="pv_share">📸 Save card</button><button style="flex:1;border:2px solid var(--bk);background:var(--bk);color:#fff;font-weight:800;text-transform:uppercase;font-size:11px;padding:9px;cursor:pointer" onclick="newRun(false)">${win?'Go again →':'Try again →'}</button></div>
-      ${IN_APP?'':`<div style="margin:9px 14px 0"><a href="${PLAY_URL}&amp;referrer=utm_source%3Dweb%26utm_medium%3Dendcard" target="_blank" rel="noopener" style="display:block;border:2px solid var(--bk);background:#fff;color:#111;text-align:center;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;text-decoration:none;padding:8px">▶ Also on Google Play</a></div>`}
-      <div style="text-align:center;margin:7px 14px 9px"><a href="mailto:${CONTACT}?subject=COFOUNDER%20feedback" style="font-size:10px;font-weight:700;color:#6b6760;text-decoration:underline">Found a bug? Have notes? Feedback →</a></div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--ylw);border-top:3px solid var(--bk);padding:9px"><div style="width:38px;height:38px;border:3px solid var(--bk);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--mono);font-size:15px;color:#111;flex-shrink:0">$0</div><div><div style="font-weight:800;font-size:15px;letter-spacing:.5px;color:#111">COFOUNDER</div><div style="font-size:9.5px;font-weight:700;color:#111">Raise billions. Build nothing.</div></div></div>
-    </div>`;
-    const sh=g("pv_share");if(sh)sh.onclick=()=>shareCard(win,bought,acq);
-    const ex=g("pv_endx");if(ex)ex.onclick=()=>{P.endDismissed=true;pvRender();};
-  } else {end.className="";end.innerHTML="";}
-}
-//=================== SHARE CARD (canvas → PNG) ===================
-function shareCard(win,bought,acq){
-  const W=1080,H=1920,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
-  const paper="#f4f1e9",bk="#111",ylw="#ffd400",rd="#e5342a",grn="#1f9d55",mut="#6b6760";
-  x.fillStyle=paper;x.fillRect(0,0,W,H);
-  x.strokeStyle=bk;x.lineWidth=14;x.strokeRect(28,28,W-56,H-56);
-  const cx=W/2;
-  // teksti mähkimise fix (Siim 12.06): mõõdame measureText-iga — kastides kahaneb font, ridadel sõnapiiri-ellips
-  const FF=(w,s)=>w+" "+s+"px Helvetica,Arial,sans-serif";
-  const fit=(txt,maxW,w,s,min)=>{x.font=FF(w,s);while(x.measureText(txt).width>maxW&&s>min){s--;x.font=FF(w,s);}};
-  const ell=(txt,maxW)=>{if(x.measureText(txt).width<=maxW)return txt;let t=txt;while(t.length>2&&x.measureText(t+"…").width>maxW){const t2=t.replace(/\s+\S*$/,"");t=(t2===t||!t2)?t.slice(0,-2):t2;}return t+"…";};
-  x.textAlign="center";x.fillStyle=bk;
-  x.font="800 34px Helvetica,Arial,sans-serif";x.fillText("COFOUNDER — the real AI-ntrepreneur game",cx,160);
-  const ttl=acq?"ACQUIHIRED":(bought?"ACQUIRED":(win?"UNICORN":"YEAR OVER"));
-  x.fillStyle=win?grn:(acq?"#b8860b":rd);x.fillRect(90,250,W-180,170);
-  x.fillStyle="#fff";x.font="800 96px Helvetica,Arial,sans-serif";x.fillText(ttl,cx,372);
-  x.fillStyle=bk;fit((P.name||""),W-220,"800",62,36);x.fillText((P.name||""),cx,560);
-  x.fillStyle=mut;x.font="italic 30px Helvetica,Arial,sans-serif";
-  const tg=(P.tagline||"").replace(/\{buzz\}/g,curBuzz().name);x.fillText(ell(tg,W-200),cx,618);
-  x.fillStyle=bk;x.font="800 26px Helvetica,Arial,sans-serif";x.fillText("FOUNDER: "+(P.archName||"The Dropout").toUpperCase(),cx,672);
-  x.fillStyle=mut;x.font="800 30px Helvetica,Arial,sans-serif";x.fillText("PEAK VALUATION",cx,820);
-  x.fillStyle=bk;x.font="800 184px Helvetica,Arial,sans-serif";x.fillText("$"+fmt(P.peakVal||valuation()),cx,1010);
-  x.fillStyle=rd;x.font="800 48px Helvetica,Arial,sans-serif";x.fillText("REVENUE: $0",cx,1105);
-  const stats=[["BUZZWORD",curBuzz().name],["MONTH",(win?P.month:(B().totalMonths||10))+" / "+(B().totalMonths||10)],["YOU OWN",Math.round(P.ownership||100)+"%"]];
-  const bw=(W-180)/3;x.lineWidth=6;
-  stats.forEach((s,i)=>{const bx=90+i*bw;x.strokeStyle=bk;x.strokeRect(bx,1210,bw,210);
-    x.fillStyle=mut;x.font="800 24px Helvetica,Arial,sans-serif";x.fillText(s[0],bx+bw/2,1285);
-    const vs=(s[1]||"").toString();x.fillStyle=bk;fit(vs,bw-26,"800",46,22);x.fillText(vs,bx+bw/2,1360);});
-  x.fillStyle="#b8860b";x.font="800 38px Helvetica,Arial,sans-serif";
-  x.fillText("In the founder's pocket: $"+fmt(pocketMoney()),cx,1530);
-  if((P.usedShips||[]).length){x.fillStyle=mut;x.font="italic 28px Helvetica,Arial,sans-serif";
-    const ds="Last shipped: "+(pick(P.usedShips)||"").replace(/[.\s]+$/,"");x.fillText(ell(ds,W-180),cx,1600);}
-  const extra=(P.nemesis&&P.nemesis.won)?("RIVAL "+(P.nemesis.name||"").toUpperCase()+" GOT THERE FIRST"):(((P.paperTrail||0)>=2)?("PAPER TRAIL: "+ptGrade().toUpperCase()):"");
-  if(extra){x.fillStyle=bk;x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(ell(extra,W-180),cx,1670);}
-  x.fillStyle=ylw;x.fillRect(90,1706,W-180,174);
-  // bränd-plokk: äpi-ikoon ($0 ruut) + mängu nimi + slogan + URL
-  // (03.08.2026 — jagatav kaart peab mängu juurde tagasi viima, muidu ei leia keegi seda üles)
-  const tName="COFOUNDER",tSlog="Raise billions. Build nothing.",tUrl=GAME_URL;
-  x.font="800 50px Helvetica,Arial,sans-serif";const wName=x.measureText(tName).width;
-  x.font="800 32px Helvetica,Arial,sans-serif";const wSlog=x.measureText(tSlog).width;
-  x.font="800 28px Helvetica,Arial,sans-serif";const wUrl=x.measureText(tUrl).width;
-  const ic=108,gap=26,gw=ic+gap+Math.max(wName,wSlog,wUrl),gx=cx-gw/2,gy=1706+(174-ic)/2;
-  x.strokeStyle=bk;x.lineWidth=8;x.strokeRect(gx+4,gy+4,ic-8,ic-8);
-  x.fillStyle=bk;x.textAlign="center";x.font="800 54px Helvetica,Arial,sans-serif";x.fillText("$0",gx+ic/2,gy+ic/2+19);
-  x.textAlign="left";
-  x.font="800 50px Helvetica,Arial,sans-serif";x.fillText(tName,gx+ic+gap,gy+40);
-  x.font="800 32px Helvetica,Arial,sans-serif";x.fillText(tSlog,gx+ic+gap,gy+82);
-  x.font="800 28px Helvetica,Arial,sans-serif";x.fillText(tUrl,gx+ic+gap,gy+124);
-  x.textAlign="center";
-  // download
-  try{const a=document.createElement("a");a.href=c.toDataURL("image/png");a.download=(P.name||"cofounder").replace(/[^a-z0-9]+/gi,"_")+"_card.png";a.click();
-    toast("good","Card saved","Share your $0-revenue empire.");}catch(e){toast("bad","Could not save","Try a screenshot instead.");}
-}
-
-//=================== HELPERS ===================
-function fmt(n){if(n===Infinity)return"∞";if(n<1000)return (n<10&&n%1!==0)?n.toFixed(1):Math.round(n).toString();
-  const u=["","K","M","B","T","Qa","Qi"];let i=0;while(n>=1000&&i<u.length-1){n/=1000;i++}return n.toFixed(2).replace(/\.?0+$/,"")+u[i]}
-function toast(cls,t,b){const tt=document.getElementById("toasts");while(tt.children.length>=2)tt.firstChild.remove();const e=document.createElement("div");e.className="toast "+cls;e.innerHTML=`<b>${t}</b><br>${b}`;tt.appendChild(e);setTimeout(()=>{e.style.opacity=0;e.style.transition=".4s";setTimeout(()=>e.remove(),400)},3500)}
-function modal(t,b,no,yes,onNo,onYes){document.getElementById("mt").textContent=t;document.getElementById("mb").textContent=b;
-  document.getElementById("mno").textContent=no;document.getElementById("myes").textContent=yes;
-  const m=document.getElementById("modal");m.style.display="flex";
-  document.getElementById("mno").onclick=()=>{m.style.display="none";onNo&&onNo()};
-  document.getElementById("myes").onclick=()=>{m.style.display="none";onYes&&onYes()};
-}
-
-//=================== TOOLBAR ===================
-document.getElementById("exp").onclick=()=>{
-  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="content.json";a.click();
-};
-document.getElementById("imp").onclick=()=>{
-  const i=document.createElement("input");i.type="file";i.accept=".json";
-  i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{S=JSON.parse(r.result);if(!S.flavor)S.flavor=clone(SEED.flavor);save();renderAll();showTab("upgrades");toast("good","Imported","content.json loaded.")}catch(err){toast("bad","Error","Invalid JSON.")}};r.readAsText(f)};
-  i.click();
-};
-document.getElementById("reseed").onclick=()=>{if(confirm("Replace all content with the seed. Sure?")){S=clone(SEED);P=null;save();renderAll();showTab("upgrades")}};
-
-//=================== JSON VIEW ===================
-document.getElementById("v_json").innerHTML=`<p class="hint">Raw content.json. Edit directly and Apply. This is the file the game engine reads.</p><textarea class="json" id="jsonarea"></textarea><div style="margin-top:8px"><button class="pri" id="applyjson">Apply changes</button></div>`;
-document.getElementById("applyjson").onclick=()=>{try{S=JSON.parse(document.getElementById("jsonarea").value);if(!S.flavor)S.flavor=clone(SEED.flavor);save();renderAll();toast("good","Applied","")}catch(e){toast("bad","Error","Invalid JSON.")}};
-
-//=================== INIT ===================
-// LAUNCH-režiim (11.06): mäng avaneb ALATI, igal ekraanil. Studio-editor on ?studio=1 taga
-// (nt https://.../cofounder/?studio=1 või file://...cofounder.html?studio=1).
-renderAll();
-const wantStudio=new URLSearchParams(location.search).has("studio");
-if(!wantStudio){
-  const hd=document.querySelector("header"),tb=document.getElementById("tabs");
-  if(hd)hd.style.display="none";if(tb)tb.style.display="none";
-  showTab("preview");
-}else{
-  showTab(window.matchMedia("(max-width:760px)").matches ? "preview" : "upgrades");
-}
+})();
 </script>
+
 </body>
 </html>

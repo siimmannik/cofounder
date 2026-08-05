@@ -3,7 +3,7 @@
  "name": "COFOUNDER — the real AI-ntrepreneur game",
  "short_name": "COFOUNDER",
  "description": "Raise billions. Build nothing. A satirical startup game: climb the buzzword ladder to a $1B valuation with $0 revenue.",
- "start_url": "./index.html",
+ "start_url": "./play.html",
  "scope": "./",
  "display": "standalone",
  "orientation": "portrait",
