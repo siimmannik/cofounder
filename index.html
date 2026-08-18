@@ -141,6 +141,32 @@
   .pill{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
     border:2px solid var(--bk);background:#fff;padding:5px 10px}
 
+  /* ---------- press / critical acclaim ---------- */
+  .press{border-top:3px solid var(--bk);border-bottom:3px solid var(--bk);background:#fff;
+    margin-top:26px;padding:16px 0}
+  .pressRow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:12px 30px;padding:0 18px}
+  .pmark{color:var(--mut);white-space:nowrap;line-height:1.1;display:inline-block}
+  .m1{font-family:Verdana,Geneva,sans-serif;font-weight:700;font-size:19px;letter-spacing:-1.1px}
+  .m2{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:21px;letter-spacing:-.3px}
+  .m3{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:19px;
+    text-transform:uppercase;letter-spacing:3.4px}
+  .m4{font-family:"Times New Roman",Times,serif;font-size:18px;text-transform:uppercase;letter-spacing:1.5px}
+  .m5{font-family:Georgia,serif;font-weight:700;font-size:20px;letter-spacing:-.5px}
+  .m6{font-family:Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;font-size:18px;letter-spacing:2.1px}
+
+  .crits{display:grid;grid-template-columns:1fr;gap:14px;margin-top:26px}
+  @media(min-width:640px){.crits{grid-template-columns:1fr 1fr}}
+  @media(min-width:980px){.crits{grid-template-columns:1fr 1fr 1fr}}
+  .crit{margin:0;border:3px solid var(--bk);background:#fff;padding:15px 16px;
+    box-shadow:5px 5px 0 var(--bk);display:flex;flex-direction:column}
+  .crit blockquote{margin:0}
+  .crit p{margin:0;font-size:14px;line-height:1.5;color:var(--bk)}
+  .crit figcaption{margin-top:auto;padding-top:11px;border-top:2px solid var(--bk)}
+  .crit figcaption .pmark{font-size:15px;color:var(--bk)}
+  .fineprint{margin:24px 0 0;font-size:12px;line-height:1.5;color:var(--mut);
+    font-style:italic;text-align:center}
+
   .final{text-align:center}
   .final .ctas{justify-content:center;margin-bottom:0}
 
@@ -269,6 +295,55 @@
       <img src="store-assets/phone-3-1080x1920.png" alt="COFOUNDER — the live timeline" loading="lazy">
       <img src="store-assets/phone-4-1080x1920.png" alt="COFOUNDER — the epilogue" loading="lazy">
     </div>
+  </div>
+</section>
+
+<section class="blk">
+  <div class="wrap">
+    <p class="kicker">Critical acclaim</p>
+    <h2>The press is unanimous.</h2>
+
+    <div class="press">
+      <div class="pressRow">
+        <span class="pmark m1">TechMunch</span>
+        <span class="pmark m2">The Financier</span>
+        <span class="pmark m3">Fired Magazine</span>
+        <span class="pmark m4">The Mall Street Journal</span>
+        <span class="pmark m5">Chicago Fun-Times</span>
+        <span class="pmark m6">The Daily Telegrafh</span>
+      </div>
+    </div>
+
+    <div class="crits">
+      <figure class="crit">
+        <blockquote><p>&ldquo;Forget unicorns. This game will crush your startup dreams faster than your seed investor starts ghosting your calls.&rdquo;</p></blockquote>
+        <figcaption><span class="pmark m1">TechMunch</span></figcaption>
+      </figure>
+      <figure class="crit">
+        <blockquote><p>&ldquo;A harsh but necessary glimpse into the theater of the absurd that is modern venture capitalism. Our analysts recommend playing it at least three times before raising your seed round.&rdquo;</p></blockquote>
+        <figcaption><span class="pmark m2">The Financier</span></figcaption>
+      </figure>
+      <figure class="crit">
+        <blockquote><p>&ldquo;Finally, something that perfectly simulates the exact feeling of your best-friend-turned-cofounder burning through your $1.5M runway on a random NFT collection.&rdquo;</p></blockquote>
+        <figcaption><span class="pmark m3">Fired Magazine</span></figcaption>
+      </figure>
+      <figure class="crit">
+        <blockquote><p>&ldquo;A game that captures the essence of Silicon Valley with more painful accuracy than an unexpected subpoena landing on the CEO&rsquo;s desk.&rdquo;</p></blockquote>
+        <figcaption><span class="pmark m4">The Mall Street Journal</span></figcaption>
+      </figure>
+      <figure class="crit">
+        <blockquote><p>&ldquo;The most fun you can have going virtually bankrupt! 10/10, would play again, even while the company bank account is permanently overdrawn and the burn rate approaches the speed of light.&rdquo;</p></blockquote>
+        <figcaption><span class="pmark m5">Chicago Fun-Times</span></figcaption>
+      </figure>
+      <figure class="crit">
+        <blockquote><p>&ldquo;It&rsquo;s like Monopoly, but instead of buying houses and hotels, you have to convince VCs that your 15th pivot is definitely the right one this time.&rdquo;</p></blockquote>
+        <figcaption><span class="pmark m6">The Daily Telegrafh</span></figcaption>
+      </figure>
+    </div>
+
+    <p class="fineprint">Every quote above is invented, and so is every publication that
+    supposedly wrote it. Any resemblance to an actual newspaper is a coincidence we are
+    fully prepared to defend in court &mdash; ideally with money we have not raised yet.</p>
   </div>
 </section>
 
